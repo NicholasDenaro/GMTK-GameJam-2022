@@ -90,7 +90,7 @@ namespace Game
         {
             this.dice.Add(dice);
 
-            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.DiceInPlay()}";
+            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
             this.descriptionDice.ChangeText(diceText);
             this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
         }
@@ -99,7 +99,7 @@ namespace Game
         {
             this.dice.Remove(dice);
 
-            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.DiceInPlay()}";
+            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
             this.descriptionDice.ChangeText(diceText);
             this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
         }
@@ -113,7 +113,7 @@ namespace Game
 
 
             // TODO: +1 is a big hack
-            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.DiceInPlay() + 1}";
+            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay() + 1}";
             this.descriptionDice.ChangeText(diceText);
             this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
 

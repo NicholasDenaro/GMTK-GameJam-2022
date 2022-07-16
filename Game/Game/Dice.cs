@@ -26,6 +26,8 @@ namespace Game
         private Description2D descriptionSymbol;
         private Entity symbolEntity;
 
+
+
         private int sides;
         private int[] faces;
         private int index;
@@ -35,6 +37,7 @@ namespace Game
         private bool showHealth;
         private bool held;
         public bool IsLocked { get; private set; }
+        public Faces Face => (Faces)this.faces[index % this.faces.Length];
 
         private int rollingTime = -1;
         private (double x, double y) avgVel = (0, 0);
@@ -92,6 +95,27 @@ namespace Game
             lastMousePos = new Point(info.X, info.Y);
         }
 
+        public void MoveToBattle(int row, int index, int count)
+        {
+            Program.BattleLocation.AddEntity(this);
+            Program.BattleLocation.AddEntity(this.diceFace);
+            Program.BattleLocation.AddEntity(this.symbolEntity);
+
+            this.description.SetCoords(Program.Width / 2 - count * 48 / 2 + index * 48, Program.Height - 48 - row * 48);
+            this.resetPositions();
+
+            this.descriptionSymbol.ImageIndex = 0;
+            IsLocked = false;
+        }
+
+        public void RemoveFromBattle()
+        {
+            Program.BattleLocation.RemoveEntity(this.Id);
+            Program.BattleLocation.RemoveEntity(this.diceFace.Id);
+            Program.BattleLocation.RemoveEntity(this.symbolEntity.Id);
+            Program.BattleLocation.RemoveEntity(this.healthEntity.Id);
+        }
+
         public void Despawn()
         {
             Program.Engine.Location(Program.GameState).RemoveEntity(this.Id);
@@ -145,6 +169,21 @@ namespace Game
             }
         }
 
+        public bool Damage(int damage)
+        {
+            this.health -= damage;
+
+            if (health > 0)
+            {
+                string text = health <= 3 ? new string('♥', health) : $"{health}♥";
+                double x = this.description.X + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0));
+                this.descriptionHealth.ChangeText(text);
+                this.descriptionHealth.SetCoords(x, this.description.Y + 16);
+            }
+
+            return this.health <= 0;
+        }
+
         public void Roll(bool withVelocity = false)
         {
             if (this.IsLocked)
@@ -159,6 +198,11 @@ namespace Game
                 this.velocity = (Math.Cos(angle) * 8, Math.Sin(angle) * 8);
                 this.setRollingTime();
             }
+            else
+            {
+                this.index = Program.Random.Next(this.faces.Length);
+                this.rollingTime = Program.FPS;
+            }
         }
 
         private void setRollingTime()
@@ -170,7 +214,7 @@ namespace Game
         public override void Tick(GameState state)
         {
             // Pickup
-            if (!IsRolling && state.Controllers[0][Keys.CLICK].IsPress())
+            if (!GameRules.IsBattling && !IsRolling && state.Controllers[0][Keys.CLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.CLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
@@ -186,7 +230,7 @@ namespace Game
             }
 
             // Lock
-            if (GameRules.RollsLeft != GameRules.MaxRolls && !IsRolling && state.Controllers[0][Keys.RCLICK].IsPress())
+            if (!GameRules.IsBattling && GameRules.RollsLeft != GameRules.MaxRolls && !IsRolling && state.Controllers[0][Keys.RCLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.RCLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
@@ -203,13 +247,13 @@ namespace Game
                 }
             }
 
-            // Show health if hovering and not held
-            if (!held)
+            // Show health if hovering and not held OR if in the battle
+            if (!held || GameRules.IsBattling)
             {
                 if (!showHealth)
                 {
                     MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
-                    if (info != null && description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    if (GameRules.IsBattling || info != null && description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
                     {
                         showHealth = true;
                         state.Location.AddEntity(healthEntity);
@@ -218,7 +262,7 @@ namespace Game
                 else
                 {
                     MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
-                    if (info != null && !description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    if (!GameRules.IsBattling && info != null && !description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
                     {
                         showHealth = false;
                         state.Location.RemoveEntity(healthEntity.Id);
@@ -290,23 +334,23 @@ namespace Game
             {
                 if (this.rollingTime > 2 * Program.FPS && this.rollingTime % 2 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[index++ % this.faces.Length];
+                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 3 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[index++ % this.faces.Length];
+                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
                 }
                 else if (this.rollingTime > 1.5 * Program.FPS && this.rollingTime % 6 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[index++ % this.faces.Length];
+                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 8 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[index++ % this.faces.Length];
+                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
                 }
                 else if (this.rollingTime % 10 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[index++ % this.faces.Length];
+                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
                 }
             }
             else if (this.rollingTime == 0)

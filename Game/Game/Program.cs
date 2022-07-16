@@ -23,11 +23,13 @@ namespace Game
         public const int Height = 320;
 
         public static Location GameLocation { get; private set; }
-        private static Location MenuLocation;
-        private static Location ShopLocation;
-        private static Location BattleLocation;
-        private static Location UpgradeLocation;
-        private static Location RecruitLocation;
+        public static Location MenuLocation { get; private set; }
+        public static Location ShopLocation { get; private set; }
+        public  static Location BattleLocation { get; private set; }
+        public static Location UpgradeLocation { get; private set; }
+        public static Location RecruitLocation { get; private set; }
+
+        public static DiceBag DiceBag { get; private set; }
 
         static async Task Main()
         {
@@ -46,6 +48,7 @@ namespace Game
                 .Build();
 ;
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
+            BattleLocation = new Location(new Description2D(0, 0, Width, Height));
 
             new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
@@ -84,16 +87,22 @@ namespace Game
 
             GameRules.Init();
 
-            DiceBag diceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
+            DiceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
             //for (int i = 0; i < 5; i++)
-            for (int i = 0; i < 20; i++)
-            {
-                var keys = new List<string>(DicePresets.Keys);
-                //diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(3)]], 60 + i * 40, 60));
-                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(DicePresets.Count)]], 60 + i * 40, 60));
-            }
+            ////for (int i = 0; i < 20; i++)
+            //{
+            //    var keys = new List<string>(DicePresets.Keys);
+            //    diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(3)]], 60 + i * 40, 60));
+            //    //diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(DicePresets.Count)]], 60 + i * 40, 60));
+            //}
 
-            GameLocation.AddEntity(diceBag);
+            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresets["Red Archer"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresets["Red Healer"], 0, 0));
+
+            GameLocation.AddEntity(DiceBag);
         }
 
         public static Dictionary<int, object> mouseMap = new Dictionary<int, object>()
@@ -126,7 +135,8 @@ namespace Game
                     Faces.SHIELD,
                     Faces.SWORD,
                     Faces.SHIELD
-                }, 3) },
+                }, 
+                health: 3) },
             { "Red Archer",
                 (Sides.FOUR,
                 Colors.RED,
@@ -135,7 +145,8 @@ namespace Game
                     Faces.SHIELD,
                     Faces.BOW,
                     Faces.SHIELD
-                }, 2) },
+                },
+                health: 2) },
             { "Red Healer",
                 (Sides.FOUR,
                 Colors.RED,
@@ -144,7 +155,8 @@ namespace Game
                     Faces.SWORD,
                     Faces.HEAL,
                     Faces.SHIELD
-                }, 1) },
+                },
+                health: 1) },
             { "Blue Warrior",
                 (Sides.FOUR,
                 Colors.BLUE,
@@ -153,7 +165,8 @@ namespace Game
                     Faces.HEAL,
                     Faces.SWORD,
                     Faces.SHIELD
-                }, 4) },
+                },
+                health: 4) },
             { "Green Squire",
                 (Sides.SIX,
                 Colors.GREEN,
@@ -164,7 +177,8 @@ namespace Game
                     Faces.SHIELD,
                     Faces.SHIELD,
                     Faces.HEAL
-                }, 6) },
+                },
+                health: 6) },
             { "Green Knight",
                 (Sides.EIGHT,
                 Colors.GREEN,
@@ -177,7 +191,8 @@ namespace Game
                     Faces.SHIELD,
                     Faces.SWORD,
                     Faces.SHIELD
-                }, 8) },
+                },
+                health: 8) },
             { "Yellow Prince",
                 (Sides.TEN,
                 Colors.YELLOW,
@@ -192,7 +207,8 @@ namespace Game
                     Faces.SWORD,
                     Faces.SHIELD,
                     Faces.SWORD
-                }, 3) },
+                },
+                health: 3) },
             { "Blue Paladin",
                 (Sides.TWELVE,
                 Colors.BLUE,
@@ -209,7 +225,8 @@ namespace Game
                     Faces.SHIELD,
                     Faces.SHIELD,
                     Faces.SHIELD
-                }, 10) },
+                },
+                health: 10) },
             { "Yellow General",
                 (Sides.TWENTY,
                 Colors.YELLOW,
@@ -234,7 +251,8 @@ namespace Game
                     Faces.HEAL,
                     Faces.SHIELD,
                     Faces.SHIELD
-                }, 15) },
+                },
+                health: 15) },
         };
     }
 }

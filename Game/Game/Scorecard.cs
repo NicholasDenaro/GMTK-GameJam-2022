@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Game
@@ -95,7 +96,7 @@ namespace Game
 
             textEntity = new Entity(new TextDescription(Text, x, y));
             checkBoxEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], x - 16, y + 12));
-            ((Description2D)checkBoxEntity.Description).ImageIndex = 5;
+            ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
         }
 
         public void Display(Location location)
@@ -106,15 +107,42 @@ namespace Game
             Program.Engine.TickEnd(Program.GameState) += Tick;
         }
 
+        protected virtual void GoOnQuest()
+        {
+            List<Dice> diceToBattle = Program.GameLocation.Entities.Where(entity => entity is Dice && (entity as Dice).IsLocked).Select(entity => entity as Dice).ToList();
+            foreach(Dice dice in diceToBattle)
+            {
+                dice.Despawn();
+            }
+
+            Program.Engine.SetLocation(Program.GameState, Program.BattleLocation);
+            Regex r = new Regex("(?<health>[0-9]+).*(?<attack>[0-9]+)");
+            var match = r.Match(Text);
+            GameRules.InitBattle(diceToBattle, int.Parse(match.Groups["health"].Value), int.Parse(match.Groups["attack"].Value));
+        }
+
         private void Tick(object sender, GameState state)
         {
             var description = checkBoxEntity.Description as Description2D;
-            if (GameRules.RollsLeft != GameRules.MaxRolls ! && state.Controllers[0][Program.Keys.CLICK].IsPress())
+            if (((Description2D)checkBoxEntity.Description).ImageIndex == 5 && GameRules.RollsLeft != GameRules.MaxRolls && state.Controllers[0][Program.Keys.CLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                 {
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 6;
+                    GoOnQuest();
+                }
+            }
+
+            if (GameRules.RollsLeft != GameRules.MaxRolls)
+            {
+                if (GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 0)
+                {
+                    ((Description2D)checkBoxEntity.Description).ImageIndex = 5;
+                }
+                else if (!GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 5)
+                {
+                    ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
                 }
             }
         }
@@ -129,6 +157,10 @@ namespace Game
     class SideQuest : Quest
     {
         public SideQuest(string name, int x, int y) : base(name, x, y)
+        {
+
+        }
+        protected override void GoOnQuest()
         {
 
         }
