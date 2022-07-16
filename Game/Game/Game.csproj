@@ -12,12 +12,14 @@
     <None Remove="Sprites\desk.png" />
     <None Remove="Sprites\dice.png" />
     <None Remove="Sprites\diceFaces.png" />
+    <None Remove="Sprites\scorecard.png" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Sprites\desk.png" />
     <EmbeddedResource Include="Sprites\dice.png" />
     <EmbeddedResource Include="Sprites\diceFaces.png" />
+    <EmbeddedResource Include="Sprites\scorecard.png" />
   </ItemGroup>
 
   <ItemGroup>

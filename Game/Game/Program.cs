@@ -16,9 +16,13 @@ namespace Game
 
         public static readonly Random Random = new Random();
 
+        public static GameEngine.GameEngine Engine;
+        public const int GameState = 0;
+        public const int MenuState = 1;
+
         static async Task Main()
         {
-            (GameEngine.GameEngine engine, GameUI ui) = new GameBuilder()
+            (Engine, GameUI ui) = new GameBuilder()
                 .GameEngine(new FixedTickEngine(FPS))
                 .GameView(new GameView2D(new Drawer2DAvalonia(), 480, 320, 2, 2, Color.Gray))
                 .GameFrame(new GameUI(
@@ -36,16 +40,23 @@ namespace Game
             Sprite diceSprite = new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             Sprite diceFacesSprite = new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
             Sprite deskSprite = new Sprite("desk", "Sprites.desk.png", 480, 320, 0, 0);
-            engine.AddEntity(0, new Entity(new Description2D(deskSprite, 0, 0)));
+            new Sprite("Scorecard", "Sprites.scorecard.png", 193, 300);
+
+            Engine.AddEntity(0, new Entity(new Description2D(deskSprite, 0, 0)));
+
+            Scorecard scorecard;
+            Engine.AddEntity(0, scorecard = new Scorecard(10, 10));
+
+            scorecard.LoadSheet();
 
             Dice[] dice = new Dice[10];
             for (int i = 0; i < dice.Length; i++)
             {
                 var keys = new List<string>(DicePresets.Keys);
-                dice[i] = Dice.Create(engine, 0, DicePresets[keys[Random.Next(keys.Count)]], 60 + i * 40, 60);
+                dice[i] = Dice.Create(DicePresets[keys[Random.Next(keys.Count)]], 60 + i * 40, 60);
             }
 
-            engine.TickEnd(0) += (object s, GameState state) =>
+            Engine.TickEnd(0) += (object s, GameState state) =>
             {
                 if (state.Controllers[1][Keys.ROLL].IsPress())
                 {
@@ -56,7 +67,7 @@ namespace Game
                 }
             };
 
-            await engine.Start();
+            await Engine.Start();
         }
 
         public static Dictionary<int, object> mouseMap = new Dictionary<int, object>()
@@ -78,13 +89,125 @@ namespace Game
 
         public enum Keys { CLICK, RCLICK, ROLL }
 
-        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces)> DicePresets = new Dictionary<string, (Sides sides, Colors color, Faces[] faces)>()
+        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)> DicePresets = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)>()
         {
-            { "Red Warrior", (Sides.FOUR, Colors.RED, new []{ Faces.SWORD, Faces.SHIELD, Faces.SWORD, Faces.SHIELD }) },
-            { "Red Archer", (Sides.FOUR, Colors.RED, new []{ Faces.BOW, Faces.SHIELD, Faces.BOW, Faces.SHIELD }) },
-            { "Red Healer", (Sides.FOUR, Colors.RED, new []{ Faces.HEAL, Faces.SHIELD, Faces.SWORD, Faces.SHIELD }) },
-            { "Blue Warrior", (Sides.FOUR, Colors.BLUE, new []{ Faces.SWORD, Faces.HEAL, Faces.SWORD, Faces.SHIELD }) },
-            { "Blue Knight", (Sides.EIGHT, Colors.BLUE, new []{ Faces.SWORD, Faces.SHIELD, Faces.HEAL, Faces.SHIELD, Faces.SWORD, Faces.SHIELD, Faces.SWORD, Faces.SHIELD }) },
+            { "Red Warrior",
+                (Sides.FOUR,
+                Colors.RED,
+                new []{ 
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD
+                }, 3) },
+            { "Red Archer",
+                (Sides.FOUR,
+                Colors.RED,
+                new []{
+                    Faces.BOW,
+                    Faces.SHIELD,
+                    Faces.BOW,
+                    Faces.SHIELD
+                }, 2) },
+            { "Red Healer",
+                (Sides.FOUR,
+                Colors.RED,
+                new []{
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD
+                }, 1) },
+            { "Blue Warrior",
+                (Sides.FOUR,
+                Colors.BLUE,
+                new []{
+                    Faces.SWORD,
+                    Faces.HEAL,
+                    Faces.SWORD,
+                    Faces.SHIELD
+                }, 4) },
+            { "Green Squire",
+                (Sides.SIX,
+                Colors.GREEN,
+                new []{
+                    Faces.SWORD,
+                    Faces.HEAL,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.HEAL
+                }, 6) },
+            { "Green Knight",
+                (Sides.EIGHT,
+                Colors.GREEN,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD
+                }, 8) },
+            { "Yellow Prince",
+                (Sides.TEN,
+                Colors.YELLOW,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD
+                }, 3) },
+            { "Blue Paladin",
+                (Sides.TWELVE,
+                Colors.BLUE,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SHIELD
+                }, 10) },
+            { "Yellow General",
+                (Sides.TWENTY,
+                Colors.YELLOW,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.SHIELD
+                }, 15) },
         };
     }
 }
