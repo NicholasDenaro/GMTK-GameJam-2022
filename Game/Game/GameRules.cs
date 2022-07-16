@@ -103,6 +103,21 @@ namespace Game
                 dice.RemoveFromBattle();
             }
 
+            if (battleDice.Count == 0)
+            {
+                Lives--;
+                if (Lives == 0)
+                {
+                    Program.Engine.SetLocation(Program.GameState, Program.GameOverLocation);
+                    return;
+                }
+                else
+                {
+                    livesDescription.ChangeText(new string('♥', Lives));
+                    livesDescription.ChangeCoordsDelta(20, 0);
+                }
+            }
+
             // TODO: MAJOR BUG, the engine needs another tick to remove entities, but doesn't get a tick until it load again.
             // This could be fine if you don't try to add the same entities back in, but adding is done first. Maybe swap the order of remove and add?
             // Don't add and silently continue because then they'll be removed
@@ -265,6 +280,11 @@ namespace Game
                             battleShield++;
                             break;
                         case Program.Faces.HEAL:
+                            Dice target = battleDice.FirstOrDefault(d => !d.IsFullHealth);
+                            if (target != null)
+                            {
+                                target.Heal(1);
+                            }
                             break;
                         default:
                             break;
@@ -280,7 +300,7 @@ namespace Game
                         Dice deadDice = battleDice[0];
                         battleDice.RemoveAt(0);
                         deadDice.RemoveFromBattle();
-                        turn--;
+                        turn = -1;
                     }
                 }
             }
@@ -288,7 +308,7 @@ namespace Game
             if (actionTimer % 3 == 2)
             {
                 turn++;
-                return battleEnemyHealth <= 0;
+                return battleEnemyHealth <= 0 || battleDice.Count == 0;
             }
 
             return false;

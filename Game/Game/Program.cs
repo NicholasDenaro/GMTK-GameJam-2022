@@ -24,10 +24,13 @@ namespace Game
 
         public static Location GameLocation { get; private set; }
         public static Location MenuLocation { get; private set; }
+        public static Location GameOverLocation { get; private set; }
         public static Location ShopLocation { get; private set; }
         public  static Location BattleLocation { get; private set; }
         public static Location UpgradeLocation { get; private set; }
         public static Location RecruitLocation { get; private set; }
+
+        public static Description2D PlayArea { get; private set; }
 
         public static DiceBag DiceBag { get; private set; }
 
@@ -48,6 +51,7 @@ namespace Game
                 .Build();
 ;
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
+            GameOverLocation = new Location(new Description2D(0, 0, Width, Height));
             BattleLocation = new Location(new Description2D(0, 0, Width, Height));
 
             new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
@@ -74,11 +78,20 @@ namespace Game
                     GameSetup();
                 }
             };
+
+            //Game Over
+            GameOverLocation.AddEntity(new Entity(new TextDescription("Game Over", Program.Width / 2 - ("Game Over".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
         }
 
         private static void GameSetup()
         {
             GameLocation.AddEntity(new Entity(new Description2D(new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0), 0, 0)));
+
+            int x = Program.Width / 2 - 48 + 16;
+            int xEnd = Program.Width - 16;
+            int y = 16;
+            int yEnd = Program.Height - 96 - 16;
+            GameLocation.AddEntity(new Entity(PlayArea = new Description2D(new Sprite("desk2", "Sprites.desk2.png", 240, 160, 0, 0), x, y, xEnd - x, yEnd - y)));
 
             Scorecard scorecard;
             GameLocation.AddEntity(scorecard = new Scorecard(10, 10));

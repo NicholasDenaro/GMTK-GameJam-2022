@@ -32,11 +32,13 @@ namespace Game
         private int[] faces;
         private int index;
         private int health;
+        private int maxHealth;
 
         public bool IsRolling { get; private set; }
         private bool showHealth;
         private bool held;
         public bool IsLocked { get; private set; }
+        public bool IsFullHealth => this.health == this.maxHealth;
         public Faces Face => (Faces)this.faces[index % this.faces.Length];
 
         private int rollingTime = -1;
@@ -64,6 +66,7 @@ namespace Game
             this.healthEntity = new Entity(this.descriptionHealth = new TextDescription(health <= 3 ? new string('♥', health) : $"{health}♥", x + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0) ), y + 16));
             this.symbolEntity = new Entity(this.descriptionSymbol = new Description2D(Sprite.Sprites["Symbols"], x, y - 20));
 
+            this.maxHealth = health;
             this.health = health;
             this.sides = sides;
             this.faces = faces;
@@ -73,7 +76,7 @@ namespace Game
             velocity = (0, 0);
         }
 
-        private void resetPositions()
+        private void ResetPositions()
         {
             this.descriptionFace.SetCoords(this.description.X, this.description.Y + FaceOffset(sides));
             this.descriptionHealth.SetCoords(this.description.X + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0)), this.description.Y + 16);
@@ -84,7 +87,7 @@ namespace Game
 
         {
             this.description.SetCoords(x, y);
-            this.resetPositions();
+            this.ResetPositions();
             Program.Engine.AddEntity(Program.GameState, this);
             Program.Engine.AddEntity(Program.GameState, this.diceFace);
             Program.Engine.AddEntity(Program.GameState, this.symbolEntity);
@@ -102,7 +105,7 @@ namespace Game
             Program.BattleLocation.AddEntity(this.symbolEntity);
 
             this.description.SetCoords(Program.Width / 2 - count * 48 / 2 + index * 48, Program.Height - 48 - row * 48);
-            this.resetPositions();
+            this.ResetPositions();
 
             this.descriptionSymbol.ImageIndex = 0;
             IsLocked = false;
@@ -182,6 +185,16 @@ namespace Game
             }
 
             return this.health <= 0;
+        }
+
+        public void Heal(int hp)
+        {
+            this.health = Math.Min(this.maxHealth, this.health + hp);
+
+            string text = health <= 3 ? new string('♥', health) : $"{health}♥";
+            double x = this.description.X + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0));
+            this.descriptionHealth.ChangeText(text);
+            this.descriptionHealth.SetCoords(x, this.description.Y + 16);
         }
 
         public void Roll(bool withVelocity = false)
@@ -282,6 +295,28 @@ namespace Game
                 //    this.IsRolling = true;
                 //}
 
+                if (this.description.X < Program.PlayArea.X)
+                {
+                    this.description.ChangeCoordsDelta(Program.PlayArea.X - this.description.X + 16, 0);
+                    this.ResetPositions();
+                }
+                if (this.description.X > Program.PlayArea.X + Program.PlayArea.Width)
+                {
+                    this.description.ChangeCoordsDelta(-(this.description.X - (Program.PlayArea.X + Program.PlayArea.Width) + 16), 0);
+                    this.ResetPositions();
+                }
+
+                if (this.description.Y < Program.PlayArea.Y)
+                {
+                    this.description.ChangeCoordsDelta(0, Program.PlayArea.Y - this.description.Y + 16);
+                    this.ResetPositions();
+                }
+                if (this.description.Y > Program.PlayArea.Y + Program.PlayArea.Height)
+                {
+                    this.description.ChangeCoordsDelta(0, -(this.description.Y - (Program.PlayArea.Y + Program.PlayArea.Height) + 16));
+                    this.ResetPositions();
+                }
+
                 showHealth = false;
                 state.Location.RemoveEntity(healthEntity.Id);
             }
@@ -303,8 +338,8 @@ namespace Game
                 ChangeCoordsDelta(this.velocity.x, 0);
 
                 if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
-                    || this.description.X < 16
-                    || this.description.X > Program.Width - 16)
+                    || this.description.X < Program.Width / 2 - 48 + 32
+                    || this.description.X > Program.Width - 32)
                 {
                     ChangeCoordsDelta(-this.velocity.x, 0);
                     velocity.x *= -1;
@@ -314,8 +349,8 @@ namespace Game
                 ChangeCoordsDelta(0, this.velocity.y);
 
                 if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
-                    || this.description.Y < 16
-                    || this.description.Y > Program.Height - 16)
+                    || this.description.Y < 32
+                    || this.description.Y > Program.Height - 96 - 32)
                 {
                     ChangeCoordsDelta(0, -this.velocity.y);
                     velocity.y *= -1;

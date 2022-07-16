@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="Sprites\desk.png" />
+    <None Remove="Sprites\desk2.png" />
     <None Remove="Sprites\dice.png" />
     <None Remove="Sprites\dicebag.png" />
     <None Remove="Sprites\diceFaces.png" />
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Sprites\desk.png" />
+    <EmbeddedResource Include="Sprites\desk2.png" />
     <EmbeddedResource Include="Sprites\dice.png" />
     <EmbeddedResource Include="Sprites\dicebag.png" />
     <EmbeddedResource Include="Sprites\diceFaces.png" />

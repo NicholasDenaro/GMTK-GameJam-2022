@@ -110,7 +110,14 @@ namespace Game
         protected virtual void GoOnQuest()
         {
             List<Dice> diceToBattle = Program.GameLocation.Entities.Where(entity => entity is Dice && (entity as Dice).IsLocked).Select(entity => entity as Dice).ToList();
-            foreach(Dice dice in diceToBattle)
+            List<Dice> diceToBag = Program.GameLocation.Entities.Where(entity => entity is Dice && !(entity as Dice).IsLocked).Select(entity => entity as Dice).ToList();
+            foreach (Dice dice in diceToBag)
+            {
+                dice.Despawn();
+                Program.DiceBag.AddDice(dice);
+            }
+
+            foreach (Dice dice in diceToBattle)
             {
                 dice.Despawn();
             }
@@ -119,6 +126,7 @@ namespace Game
             Regex r = new Regex("(?<health>[0-9]+).*(?<attack>[0-9]+)");
             var match = r.Match(Text);
             GameRules.InitBattle(diceToBattle, int.Parse(match.Groups["health"].Value), int.Parse(match.Groups["attack"].Value));
+
         }
 
         private void Tick(object sender, GameState state)
