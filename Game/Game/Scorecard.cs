@@ -1,6 +1,7 @@
 ﻿using GameEngine;
 using GameEngine._2D;
 using GameEngine.Interfaces;
+using GameEngine.UI.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,15 @@ namespace Game
             level = 0;
         }
 
-        public void LoadSheet()
+        public void LoadSheet(Location location)
         {
-            sheets[level].Display();
+            sheets[level].Display(location);
         }
 
-        private static Sheet[] GenerateRun()
+        private Sheet[] GenerateRun()
         {
-            return new Sheet[] { new Sheet() };
+            var description = this.Description as Description2D;
+            return new Sheet[] { new Sheet((int)description.X , (int)description.Y) };
         }
     }
 
@@ -36,26 +38,45 @@ namespace Game
         private Quest[] quests;
         private SideQuest[] sideQuests;
            
-        public Sheet()
+        public Sheet(int x , int y)
         {
-            quests = new Quest[] { new Quest("1♥ 1⸸"), new Quest("2♥ 1⸸"), new Quest("3♥ 3⸸"), new Quest("4♥ 2⸸"), new Quest("5♥ 1⸸"), new Quest("6♥ 2⸸"), };
-            sideQuests = new SideQuest[] { new SideQuest("Shop"), new SideQuest("Rest"), new SideQuest("Upgrade"), new SideQuest("Recruit"), };
+            int xoffset = 36;
+            int yoffset = 40;
+            int yy = 0;
+
+            quests = new Quest[]
+            {
+                new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("3♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("5♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("6♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+            };
+
+            yoffset += yy * 20;
+            yy = 0;
+            sideQuests = new SideQuest[]
+            {
+                new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+            };
         }
 
-        public void Display()
+        public void Display(Location location)
         {
             int y = 0;
-            int yoffset = 50;
             for (int i = 0; i < quests.Length; i++)
             {
-                Program.Engine.AddEntity(0, new Entity(new TextDescription(quests[i].Text, 50, yoffset + y++ * 20)));
+                quests[i].Display(location);
             }
 
-            yoffset += y * 20;
             y = 0;
             for (int i = 0; i < sideQuests.Length; i++)
             {
-                Program.Engine.AddEntity(0, new Entity(new TextDescription(sideQuests[i].Text, 50, yoffset + y++ * 19)));
+                sideQuests[i].Display(location);
             }
         }
     }
@@ -65,9 +86,37 @@ namespace Game
         public string Text { get; private set; }
         public bool IsFinished { get; protected set; }
 
-        public Quest(string name)
+        private Entity checkBoxEntity;
+        private Entity textEntity;
+
+        public Quest(string name, int x, int y)
         {
             Text = name;
+
+            textEntity = new Entity(new TextDescription(Text, x, y));
+            checkBoxEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], x - 16, y + 12));
+            ((Description2D)checkBoxEntity.Description).ImageIndex = 5;
+        }
+
+        public void Display(Location location)
+        {
+            location.AddEntity(textEntity);
+            location.AddEntity(checkBoxEntity);
+
+            Program.Engine.TickEnd(Program.GameState) += Tick;
+        }
+
+        private void Tick(object sender, GameState state)
+        {
+            var description = checkBoxEntity.Description as Description2D;
+            if (GameRules.RollsLeft != GameRules.MaxRolls ! && state.Controllers[0][Program.Keys.CLICK].IsPress())
+            {
+                MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                {
+                    ((Description2D)checkBoxEntity.Description).ImageIndex = 6;
+                }
+            }
         }
 
         public virtual bool CheckComplete()
@@ -79,7 +128,7 @@ namespace Game
 
     class SideQuest : Quest
     {
-        public SideQuest(string name) : base(name)
+        public SideQuest(string name, int x, int y) : base(name, x, y)
         {
 
         }

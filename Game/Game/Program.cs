@@ -19,9 +19,15 @@ namespace Game
 
         public static GameEngine.GameEngine Engine;
         public const int GameState = 0;
-        public const int MenuState = 1;
         public const int Width = 480;
         public const int Height = 320;
+
+        public static Location GameLocation { get; private set; }
+        private static Location MenuLocation;
+        private static Location ShopLocation;
+        private static Location BattleLocation;
+        private static Location UpgradeLocation;
+        private static Location RecruitLocation;
 
         static async Task Main()
         {
@@ -36,52 +42,63 @@ namespace Game
                     ))
                 .Controller(new WindowsMouseController(mouseMap))
                 .Controller(new WindowsKeyController(keyMap))
-                .StartingLocation(new Location(new Description2D(0, 0, Width, Height)))
+                .StartingLocation(MenuLocation = new Location(new Description2D(0, 0, Width, Height)))
                 .Build();
+;
+            GameLocation = new Location(new Description2D(0, 0, Width, Height));
 
-            
-            Sprite diceSprite = new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
-            Sprite diceFacesSprite = new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
-            Sprite deskSprite = new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0);
+            new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
+            new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
             new Sprite("DiceBag", "Sprites.dicebag.png", 105, 80, 0, 0);
             new Sprite("Scorecard", "Sprites.scorecard.png", 193, 300);
+            new Sprite("Symbols", "Sprites.symbols.png", 16, 16, 8, 8);
 
-            Engine.AddEntity(0, new Entity(new Description2D(deskSprite, 0, 0)));
+            MainMenuSetup();
 
-            Scorecard scorecard;
-            Engine.AddEntity(0, scorecard = new Scorecard(10, 10));
-
-            scorecard.LoadSheet();
-
-            DiceBag diceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
-            for (int i = 0; i < 10; i++)
-            {
-                var keys = new List<string>(DicePresets.Keys);
-                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(keys.Count)]], 60 + i * 40, 60));
-            }
-
-            Engine.AddEntity(0, diceBag);
-
-            Engine.TickEnd(0) += (object s, GameState state) =>
-            {
-                if (state.Controllers[1][Keys.ROLL].IsPress())
-                {
-                    IEnumerable<Dice> diceList = state.Location.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice);
-                    foreach (Dice dice in diceList)
-                    {
-                        dice.Roll(withVelocity: true);
-                    }
-                }
-            };
+            Engine.SetLocation(GameState, MenuLocation);
 
             await Engine.Start();
+        }
+
+        private static void MainMenuSetup()
+        {
+            MenuLocation.AddEntity(new Entity(new TextDescription("Welcome to game", Program.Width / 2, Program.Height / 2)));
+            Engine.TickEnd(0) += (object sender, GameState state) =>
+            {
+                if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
+                {
+                    Engine.SetLocation(Program.GameState, GameLocation);
+                    GameSetup();
+                }
+            };
+        }
+
+        private static void GameSetup()
+        {
+            GameLocation.AddEntity(new Entity(new Description2D(new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0), 0, 0)));
+
+            Scorecard scorecard;
+            GameLocation.AddEntity(scorecard = new Scorecard(10, 10));
+
+            scorecard.LoadSheet(GameLocation);
+
+            GameRules.Init();
+
+            DiceBag diceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
+            for (int i = 0; i < 5; i++)
+            {
+                var keys = new List<string>(DicePresets.Keys);
+                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(3)]], 60 + i * 40, 60));
+            }
+
+            GameLocation.AddEntity(diceBag);
         }
 
         public static Dictionary<int, object> mouseMap = new Dictionary<int, object>()
         {
             { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.LeftButtonPressed), Keys.CLICK },
             { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.Other), Keys.MOUSEINFO },
-            { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.MiddleButtonPressed), Keys.RCLICK },
+            { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.RightButtonPressed), Keys.RCLICK },
         };
 
         public static Dictionary<int, object> keyMap = new Dictionary<int, object>()
@@ -122,8 +139,8 @@ namespace Game
                 Colors.RED,
                 new []{
                     Faces.HEAL,
-                    Faces.SHIELD,
                     Faces.SWORD,
+                    Faces.HEAL,
                     Faces.SHIELD
                 }, 1) },
             { "Blue Warrior",

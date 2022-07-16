@@ -23,14 +23,18 @@ namespace Game
         private TextDescription descriptionHealth;
         private Entity healthEntity;
 
+        private Description2D descriptionSymbol;
+        private Entity symbolEntity;
+
         private int sides;
         private int[] faces;
         private int index;
         private int health;
 
-        private bool rolling;
-        private bool showHealth = false;
+        public bool IsRolling { get; private set; }
+        private bool showHealth;
         private bool held;
+        public bool IsLocked { get; private set; }
 
         private int rollingTime = -1;
         private (double x, double y) avgVel = (0, 0);
@@ -55,6 +59,7 @@ namespace Game
             this.description = this.Description as Description2D;
             this.diceFace = new Entity(this.descriptionFace = new Description2D(Sprite.Sprites["diceFaces"], x, y + FaceOffset(sides), 10, 10));
             this.healthEntity = new Entity(this.descriptionHealth = new TextDescription(health <= 3 ? new string('♥', health) : $"{health}♥", x + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0) ), y + 16));
+            this.symbolEntity = new Entity(this.descriptionSymbol = new Description2D(Sprite.Sprites["Symbols"], x, y - 20));
 
             this.health = health;
             this.sides = sides;
@@ -68,6 +73,7 @@ namespace Game
         {
             this.descriptionFace.SetCoords(this.description.X, this.description.Y + FaceOffset(sides));
             this.descriptionHealth.SetCoords(this.description.X + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0)), this.description.Y + 16);
+            this.descriptionSymbol.SetCoords(this.description.X, this.description.Y - 20);
         }
 
         public void Spawn(int x, int y, bool held)
@@ -77,6 +83,7 @@ namespace Game
             this.resetPositions();
             Program.Engine.AddEntity(Program.GameState, this);
             Program.Engine.AddEntity(Program.GameState, this.diceFace);
+            Program.Engine.AddEntity(Program.GameState, this.symbolEntity);
 
             this.held = held;
             MouseControllerInfo info = Program.Engine.Controllers(Program.GameState)[0][Keys.CLICK].Info as MouseControllerInfo;
@@ -88,6 +95,11 @@ namespace Game
         {
             Program.Engine.Location(Program.GameState).RemoveEntity(this.Id);
             Program.Engine.Location(Program.GameState).RemoveEntity(this.diceFace.Id);
+            if (this.showHealth)
+            {
+                Program.Engine.Location(Program.GameState).RemoveEntity(this.healthEntity.Id);
+            }
+            Program.Engine.Location(Program.GameState).RemoveEntity(this.symbolEntity.Id);
         }
 
         private static int FaceOffset(int sides)
@@ -134,7 +146,12 @@ namespace Game
 
         public void Roll(bool withVelocity = false)
         {
-            this.rolling = true;
+            if (this.IsLocked)
+            {
+                return;
+            }
+
+            this.IsRolling = true;
             if (withVelocity)
             {
                 double angle = Program.Random.NextDouble() * Math.PI * 2;
@@ -152,7 +169,7 @@ namespace Game
         public override void Tick(GameState state)
         {
             // Pickup
-            if (!rolling && state.Controllers[0][Keys.CLICK].IsPress())
+            if (!IsRolling && state.Controllers[0][Keys.CLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.CLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
@@ -163,6 +180,24 @@ namespace Game
                     {
                         showHealth = true;
                         state.Location.AddEntity(healthEntity);
+                    }
+                }
+            }
+
+            // Lock
+            if (GameRules.RollsLeft != GameRules.MaxRolls && !IsRolling && state.Controllers[0][Keys.RCLICK].IsPress())
+            {
+                MouseControllerInfo info = state.Controllers[0][Keys.RCLICK].Info as MouseControllerInfo;
+                if (description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                {
+                    this.IsLocked = !this.IsLocked;
+                    if (this.IsLocked)
+                    {
+                        this.descriptionSymbol.ImageIndex = 2;
+                    }
+                    else
+                    {
+                        this.descriptionSymbol.ImageIndex = 0;
                     }
                 }
             }
@@ -195,12 +230,12 @@ namespace Game
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.CLICK].Info as MouseControllerInfo;
                 this.held = false;
-                if (avgVel.x * avgVel.x + avgVel.y * avgVel.y > 16)
-                {
-                    this.velocity = avgVel;
-                    this.setRollingTime();
-                    this.rolling = true;
-                }
+                //if (!IsLocked && avgVel.x * avgVel.x + avgVel.y * avgVel.y > 16)
+                //{
+                //    this.velocity = avgVel;
+                //    this.setRollingTime();
+                //    this.IsRolling = true;
+                //}
 
                 showHealth = false;
                 state.Location.RemoveEntity(healthEntity.Id);
@@ -211,9 +246,7 @@ namespace Game
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.CLICK].Info as MouseControllerInfo;
 
-                this.description.ChangeCoordsDelta(info.X - lastMousePos.X, info.Y - lastMousePos.Y);
-                this.descriptionFace.ChangeCoordsDelta(info.X - lastMousePos.X, info.Y - lastMousePos.Y);
-                this.descriptionHealth.ChangeCoordsDelta(info.X - lastMousePos.X, info.Y - lastMousePos.Y);
+                ChangeCoordsDelta(info.X - lastMousePos.X, info.Y - lastMousePos.Y);
 
                 avgVel = (avgVel.x * 0.8 + (info.X - lastMousePos.X) * 0.2, avgVel.y * 0.8 + (info.Y - lastMousePos.Y) * 0.2);
                 lastMousePos = new Point(info.X, info.Y);
@@ -222,32 +255,24 @@ namespace Game
             // Rolling/Movement
             if (Math.Abs(this.velocity.x) - minVelocity > 0 || Math.Abs(this.velocity.y) - minVelocity > 0)
             {
-                this.description.ChangeCoordsDelta(this.velocity.x, 0);
-                this.descriptionFace.ChangeCoordsDelta(this.velocity.x, 0);
-                this.descriptionHealth.ChangeCoordsDelta(this.velocity.x, 0);
+                ChangeCoordsDelta(this.velocity.x, 0);
 
                 if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
                     || this.description.X < 16
                     || this.description.X > Program.Width - 16)
                 {
-                    this.description.ChangeCoordsDelta(-this.velocity.x, 0);
-                    this.descriptionFace.ChangeCoordsDelta(-this.velocity.x, 0);
-                    this.descriptionHealth.ChangeCoordsDelta(-this.velocity.x, 0);
+                    ChangeCoordsDelta(-this.velocity.x, 0);
                     velocity.x *= -1;
                 }
 
 
-                this.description.ChangeCoordsDelta(0, this.velocity.y);
-                this.descriptionFace.ChangeCoordsDelta(0, this.velocity.y);
-                this.descriptionHealth.ChangeCoordsDelta(0, this.velocity.y);
+                ChangeCoordsDelta(0, this.velocity.y);
 
                 if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
                     || this.description.Y < 16
                     || this.description.Y > Program.Height - 16)
                 {
-                    this.description.ChangeCoordsDelta(0, -this.velocity.y);
-                    this.descriptionFace.ChangeCoordsDelta(0, -this.velocity.y);
-                    this.descriptionHealth.ChangeCoordsDelta(0, -this.velocity.y);
+                    ChangeCoordsDelta(0, -this.velocity.y);
                     velocity.y *= -1;
                 }
 
@@ -260,7 +285,7 @@ namespace Game
             }
 
             // Face rolling
-            if (this.rolling && --this.rollingTime > 0)
+            if (this.IsRolling && --this.rollingTime > 0)
             {
                 if (this.rollingTime > 2 * Program.FPS && this.rollingTime % 2 == 0)
                 {
@@ -285,10 +310,18 @@ namespace Game
             }
             else if (this.rollingTime == 0)
             {
-                this.rolling = false;
+                this.IsRolling = false;
                 this.rollingTime = -1;
                 Console.WriteLine("finished rolling");
             }
+        }
+
+        private void ChangeCoordsDelta(double dx, double dy)
+        {
+            this.description.ChangeCoordsDelta(dx, dy);
+            this.descriptionFace.ChangeCoordsDelta(dx, dy);
+            this.descriptionHealth.ChangeCoordsDelta(dx, dy);
+            this.descriptionSymbol.ChangeCoordsDelta(dx, dy);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Game
                         && info.X + this.description.Sprite.X < this.description.X + this.description.Width
                         && info.Y + this.description.Sprite.Y < this.description.Y)
                     {
-                        if (this.dice.Any())
+                        if (this.dice.Any() && GameRules.CanDrawAnotherDice())
                         {
                             DrawDice().Spawn(info.X, info.Y, true);
                         }

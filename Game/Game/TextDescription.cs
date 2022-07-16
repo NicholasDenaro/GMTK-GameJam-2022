@@ -11,11 +11,11 @@ namespace Game
     {
         private string text;
         private Bitmap bitmap;
-        public TextDescription(string text, int x, int y) : base(null, x, y, 100, 24)
+        public TextDescription(string text, int x, int y) : base(null, x, y, text.Length * 12, 24)
         {
             this.text = text;
             this.DrawAction = Draw;
-            bitmap = Bitmap.Create(100, 24);
+            bitmap = Bitmap.Create(text.Length * 12, 24);
             bitmap.GetGraphics().DrawText(text, new Point(0, 0), Color.Black, 18);
         }
 

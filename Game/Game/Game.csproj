@@ -14,6 +14,7 @@
     <None Remove="Sprites\dicebag.png" />
     <None Remove="Sprites\diceFaces.png" />
     <None Remove="Sprites\scorecard.png" />
+    <None Remove="Sprites\symbols.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +23,7 @@
     <EmbeddedResource Include="Sprites\dicebag.png" />
     <EmbeddedResource Include="Sprites\diceFaces.png" />
     <EmbeddedResource Include="Sprites\scorecard.png" />
+    <EmbeddedResource Include="Sprites\symbols.png" />
   </ItemGroup>
 
   <ItemGroup>
