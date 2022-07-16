@@ -5,6 +5,7 @@ using GameEngine.UI.AvaloniaUI;
 using GameEngine.UI.Controllers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -19,27 +20,30 @@ namespace Game
         public static GameEngine.GameEngine Engine;
         public const int GameState = 0;
         public const int MenuState = 1;
+        public const int Width = 480;
+        public const int Height = 320;
 
         static async Task Main()
         {
             (Engine, GameUI ui) = new GameBuilder()
                 .GameEngine(new FixedTickEngine(FPS))
-                .GameView(new GameView2D(new Drawer2DAvalonia(), 480, 320, 2, 2, Color.Gray))
+                .GameView(new GameView2D(new Drawer2DAvalonia(), Width, Height, 2, 2, Color.Gray))
                 .GameFrame(new GameUI(
                     new AvaloniaWindowBuilder()
                         .StartupLocation(Avalonia.Controls.WindowStartupLocation.CenterScreen)
                         .Title("Game")
-                    , 0, 0, 480, 320, 2, 2
+                    , 0, 0, Width, Height, 2, 2
                     ))
                 .Controller(new WindowsMouseController(mouseMap))
                 .Controller(new WindowsKeyController(keyMap))
-                .StartingLocation(new Location(new Description2D(0, 0, 480, 320)))
+                .StartingLocation(new Location(new Description2D(0, 0, Width, Height)))
                 .Build();
 
             
             Sprite diceSprite = new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             Sprite diceFacesSprite = new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
-            Sprite deskSprite = new Sprite("desk", "Sprites.desk.png", 480, 320, 0, 0);
+            Sprite deskSprite = new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0);
+            new Sprite("DiceBag", "Sprites.dicebag.png", 105, 80, 0, 0);
             new Sprite("Scorecard", "Sprites.scorecard.png", 193, 300);
 
             Engine.AddEntity(0, new Entity(new Description2D(deskSprite, 0, 0)));
@@ -49,20 +53,23 @@ namespace Game
 
             scorecard.LoadSheet();
 
-            Dice[] dice = new Dice[10];
-            for (int i = 0; i < dice.Length; i++)
+            DiceBag diceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
+            for (int i = 0; i < 10; i++)
             {
                 var keys = new List<string>(DicePresets.Keys);
-                dice[i] = Dice.Create(DicePresets[keys[Random.Next(keys.Count)]], 60 + i * 40, 60);
+                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(keys.Count)]], 60 + i * 40, 60));
             }
+
+            Engine.AddEntity(0, diceBag);
 
             Engine.TickEnd(0) += (object s, GameState state) =>
             {
                 if (state.Controllers[1][Keys.ROLL].IsPress())
                 {
-                    for (int i = 0; i < dice.Length; i++)
+                    IEnumerable<Dice> diceList = state.Location.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice);
+                    foreach (Dice dice in diceList)
                     {
-                        dice[i].Roll();
+                        dice.Roll(withVelocity: true);
                     }
                 }
             };
@@ -72,8 +79,9 @@ namespace Game
 
         public static Dictionary<int, object> mouseMap = new Dictionary<int, object>()
         {
-            { (int)Avalonia.Input.PointerUpdateKind.LeftButtonPressed, Keys.CLICK },
-            { (int)Avalonia.Input.PointerUpdateKind.MiddleButtonPressed, Keys.RCLICK },
+            { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.LeftButtonPressed), Keys.CLICK },
+            { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.Other), Keys.MOUSEINFO },
+            { AvaloniaWindow.Key(Avalonia.Input.PointerUpdateKind.MiddleButtonPressed), Keys.RCLICK },
         };
 
         public static Dictionary<int, object> keyMap = new Dictionary<int, object>()
@@ -87,7 +95,7 @@ namespace Game
 
         public enum Faces { NONE = 0, SWORD = 1, SHIELD = 2, HEAL = 3, BOW = 4}
 
-        public enum Keys { CLICK, RCLICK, ROLL }
+        public enum Keys { CLICK, RCLICK, ROLL, MOUSEINFO }
 
         public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)> DicePresets = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)>()
         {

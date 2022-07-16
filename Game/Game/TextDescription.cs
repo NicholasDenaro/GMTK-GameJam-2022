@@ -24,5 +24,12 @@ namespace Game
             return bitmap;
         }
 
+        public void ChangeText(string text)
+        {
+            this.text = text;
+            bitmap.GetGraphics().Clear(Color.Transparent);
+            bitmap.GetGraphics().DrawText(text, new Point(0, 0), Color.Black, 18);
+        }
+
     }
 }
