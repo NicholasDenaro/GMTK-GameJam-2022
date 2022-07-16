@@ -65,6 +65,7 @@ namespace Game
             this.sides = sides;
             this.faces = faces;
             this.descriptionFace.ImageIndex = this.faces[index];
+            this.descriptionFace.ZIndex = 1;
             this.description.ImageIndex = sidesToIndex(sides) + color * 6;
             velocity = (0, 0);
         }

@@ -62,7 +62,7 @@ namespace Game
 
         private static void MainMenuSetup()
         {
-            MenuLocation.AddEntity(new Entity(new TextDescription("Welcome to game", Program.Width / 2, Program.Height / 2)));
+            MenuLocation.AddEntity(new Entity(new TextDescription("Welcome to game", Program.Width / 2 - ("Welcome to game".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
             Engine.TickEnd(0) += (object sender, GameState state) =>
             {
                 if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
@@ -85,10 +85,12 @@ namespace Game
             GameRules.Init();
 
             DiceBag diceBag = new DiceBag(Program.Width - 120, Program.Height - 100);
-            for (int i = 0; i < 5; i++)
+            //for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 20; i++)
             {
                 var keys = new List<string>(DicePresets.Keys);
-                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(3)]], 60 + i * 40, 60));
+                //diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(3)]], 60 + i * 40, 60));
+                diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(DicePresets.Count)]], 60 + i * 40, 60));
             }
 
             GameLocation.AddEntity(diceBag);
