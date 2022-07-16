@@ -25,6 +25,8 @@ namespace Game
         private BagInfoEntity infoEntity;
         private bool isInfoShown;
 
+        public int Count => dice.Count;
+
         public DiceBag(int x, int y) : base(new Description2D(Sprite.Sprites["DiceBag"], x, y))
         {
             this.description = this.Description as Description2D;
@@ -90,19 +92,17 @@ namespace Game
         {
             this.dice.Add(dice);
 
-            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
-            this.descriptionDice.ChangeText(diceText);
-            this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
+            UpdateDiceCounter();
         }
 
-        public void RemoveDice(Dice dice)
-        {
-            this.dice.Remove(dice);
+        //public void RemoveDice(Dice dice)
+        //{
+        //    this.dice.Remove(dice);
 
-            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
-            this.descriptionDice.ChangeText(diceText);
-            this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
-        }
+        //    string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
+        //    this.descriptionDice.ChangeText(diceText);
+        //    this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
+        //}
 
 
         public Dice DrawDice()
@@ -111,13 +111,19 @@ namespace Game
             var ret = this.dice[index];
             this.dice.RemoveAt(index);
 
-
             // TODO: +1 is a big hack
             string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay() + 1}";
             this.descriptionDice.ChangeText(diceText);
             this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
 
             return ret;
+        }
+
+        private void UpdateDiceCounter()
+        {
+            string diceText = $"{this.dice.Count()}/{this.dice.Count() + GameRules.NumberOfDiceInPlay()}";
+            this.descriptionDice.ChangeText(diceText);
+            this.descriptionDice.SetCoords(this.description.X + 80 - diceText.Length * 12, this.description.Y + description.Height - 4);
         }
     }
 }

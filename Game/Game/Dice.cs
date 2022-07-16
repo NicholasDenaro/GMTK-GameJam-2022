@@ -26,40 +26,43 @@ namespace Game
         private Description2D descriptionSymbol;
         private Entity symbolEntity;
 
+        private DiceInfoEntity diceInfoEntity;
 
 
         private int sides;
-        private int[] faces;
+        public int[] Faces { get; private set; }
         private int index;
         private int health;
         private int maxHealth;
+        public int NumRolls { get; private set; }
 
         public bool IsRolling { get; private set; }
         private bool showHealth;
+        private bool showInfo;
         private bool held;
         public bool IsLocked { get; private set; }
         public bool IsFullHealth => this.health == this.maxHealth;
-        public Faces Face => (Faces)this.faces[index % this.faces.Length];
+        private bool fastRolling;
+        public Faces Face => (Faces)this.Faces[index % this.Faces.Length];
 
         private int rollingTime = -1;
         private (double x, double y) avgVel = (0, 0);
         private (double x, double y) velocity;
 
 
-
-        public static Dice Create((Sides sides, Colors color, Faces[] faces, int health) info, int x, int y)
+        public static Dice Create((Sides sides, Colors color, Faces[] faces, int health, int numRolls) info, int x, int y)
         {
-            return Create(info.sides, info.color, info.faces, info.health, x, y);
+            return Create(info.sides, info.color, info.faces, info.health, info.numRolls, x, y);
         }
 
-        private static Dice Create(Sides sides, Colors color, Faces[] faces, int health, int x, int y)
+        private static Dice Create(Sides sides, Colors color, Faces[] faces, int health, int numRolls, int x, int y)
         {
-            var dice = new Dice((int)sides, (int)color, faces.Select(f => (int)f).ToArray(), health, x, y);
+            var dice = new Dice((int)sides, (int)color, faces.Select(f => (int)f).ToArray(), health, numRolls, x, y);
 
             return dice;
         }
 
-        private Dice(int sides, int color, int[] faces, int health, int x, int y) : base(new Description2D(Sprite.Sprites["dice"], x, y, 32, 32))
+        private Dice(int sides, int color, int[] faces, int health, int numRolls, int x, int y) : base(new Description2D(Sprite.Sprites["dice"], x, y, 32, 32))
         {
             this.description = this.Description as Description2D;
             this.diceFace = new Entity(this.descriptionFace = new Description2D(Sprite.Sprites["diceFaces"], x, y + FaceOffset(sides), 10, 10));
@@ -68,12 +71,15 @@ namespace Game
 
             this.maxHealth = health;
             this.health = health;
+            this.NumRolls = numRolls;
             this.sides = sides;
-            this.faces = faces;
-            this.descriptionFace.ImageIndex = this.faces[index];
+            this.Faces = faces;
+            this.descriptionFace.ImageIndex = this.Faces[index];
             this.descriptionFace.ZIndex = 1;
             this.description.ImageIndex = sidesToIndex(sides) + color * 6;
             velocity = (0, 0);
+
+            this.diceInfoEntity = new DiceInfoEntity(this, x, y);
         }
 
         private void ResetPositions()
@@ -81,6 +87,7 @@ namespace Game
             this.descriptionFace.SetCoords(this.description.X, this.description.Y + FaceOffset(sides));
             this.descriptionHealth.SetCoords(this.description.X + (health <= 3 ? -6 * health : -12 + (health >= 10 ? -6 : 0)), this.description.Y + 16);
             this.descriptionSymbol.SetCoords(this.description.X, this.description.Y - 20);
+            this.diceInfoEntity.SetCoords(this.description.X + 24, this.description.Y - 40);
         }
 
         public void Spawn(int x, int y, bool held)
@@ -128,6 +135,9 @@ namespace Game
                 Program.Engine.Location(Program.GameState).RemoveEntity(this.healthEntity.Id);
             }
             Program.Engine.Location(Program.GameState).RemoveEntity(this.symbolEntity.Id);
+
+            this.IsLocked = false;
+            this.descriptionSymbol.ImageIndex = 0;
         }
 
         private static int FaceOffset(int sides)
@@ -209,16 +219,17 @@ namespace Game
             {
                 double angle = Program.Random.NextDouble() * Math.PI * 2;
                 this.velocity = (Math.Cos(angle) * 8, Math.Sin(angle) * 8);
-                this.setRollingTime();
+                this.SetRollingTime();
             }
             else
             {
-                this.index = Program.Random.Next(this.faces.Length);
-                this.rollingTime = Program.FPS;
+                this.index = Program.Random.Next(this.Faces.Length);
+                this.rollingTime = Program.FPS / 2;
+                this.fastRolling = true;
             }
         }
 
-        private void setRollingTime()
+        private void SetRollingTime()
         {
             this.rollingTime = (int)Math.Log(minVelocity / Math.Max(Math.Abs(this.velocity.x), Math.Abs(this.velocity.y)), 0.95);
         }
@@ -279,6 +290,25 @@ namespace Game
                     {
                         showHealth = false;
                         state.Location.RemoveEntity(healthEntity.Id);
+                    }
+                }
+
+                if (!showInfo)
+                {
+                    MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
+                    if (info != null && description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    {
+                        showInfo = true;
+                        this.diceInfoEntity.Display();
+                    }
+                }
+                else
+                {
+                    MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
+                    if (GameRules.IsBattling || info != null && !description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    {
+                        showInfo = false;
+                        this.diceInfoEntity.Hide();
                     }
                 }
             }
@@ -367,31 +397,32 @@ namespace Game
             // Face rolling
             if (this.IsRolling && --this.rollingTime > 0)
             {
-                if (this.rollingTime > 2 * Program.FPS && this.rollingTime % 2 == 0)
+                if (this.fastRolling || (this.rollingTime > 2 * Program.FPS && this.rollingTime % 2 == 0))
                 {
-                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
+                    descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 3 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
+                    descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
                 }
                 else if (this.rollingTime > 1.5 * Program.FPS && this.rollingTime % 6 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
+                    descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 8 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
+                    descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
                 }
                 else if (this.rollingTime % 10 == 0)
                 {
-                    descriptionFace.ImageIndex = this.faces[++index % this.faces.Length];
+                    descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
                 }
             }
             else if (this.rollingTime == 0)
             {
                 this.IsRolling = false;
                 this.rollingTime = -1;
+                this.fastRolling = false;
                 Console.WriteLine("finished rolling");
             }
         }
@@ -402,6 +433,7 @@ namespace Game
             this.descriptionFace.ChangeCoordsDelta(dx, dy);
             this.descriptionHealth.ChangeCoordsDelta(dx, dy);
             this.descriptionSymbol.ChangeCoordsDelta(dx, dy);
+            this.diceInfoEntity.ChangeCoordsDelta(dx, dy);
         }
     }
 }

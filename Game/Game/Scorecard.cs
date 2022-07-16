@@ -49,10 +49,10 @@ namespace Game
             {
                 new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
                 new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("3♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
                 new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("5♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("6♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
             };
 
             yoffset += yy * 20;
@@ -68,13 +68,11 @@ namespace Game
 
         public void Display(Location location)
         {
-            int y = 0;
             for (int i = 0; i < quests.Length; i++)
             {
                 quests[i].Display(location);
             }
 
-            y = 0;
             for (int i = 0; i < sideQuests.Length; i++)
             {
                 sideQuests[i].Display(location);
@@ -153,30 +151,66 @@ namespace Game
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
                 }
             }
-        }
-
-        public virtual bool CheckComplete()
-        {
-            IsFinished = true;
-            return true;
+            else
+            {
+                if (!GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 5)
+                {
+                    ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
+                }
+            }
         }
     }
 
     class SideQuest : Quest
     {
+        private string name;
+
         public SideQuest(string name, int x, int y) : base(name, x, y)
         {
-
+            this.name = name;
         }
         protected override void GoOnQuest()
         {
-
+            switch(name)
+            {
+                case "Shop":
+                    GotoTheShop();
+                    break;
+                case "Rest":
+                    TakeARest();
+                    break;
+                case "Upgrade":
+                    UpgradeTheDice();
+                    break;
+                case "Recruit":
+                    RecruitMoreDice();
+                    break;
+            }
         }
 
-        public override bool CheckComplete()
+        private void GotoTheShop()
         {
-            IsFinished = true;
-            return true;
+            GameRules.OpenShop();
+        }
+        private void TakeARest()
+        {
+            List<Dice> diceList = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
+            GameRules.HealDice(diceList);
+            foreach (Dice dice in diceList)
+            {
+                dice.Despawn();
+                Program.DiceBag.AddDice(dice);
+            }
+        }
+        private void UpgradeTheDice()
+        {
+            List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
+            GameRules.UpgradeDice(dice);
+        }
+        private void RecruitMoreDice()
+        {
+            List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
+            GameRules.RecruitDice(dice);
         }
     }
 }

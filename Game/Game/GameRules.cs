@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using GameEngine.UI.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,10 @@ namespace Game
 
         public static int Lives { get; private set; }
 
+        public static int Coins { get; private set; } = 5;
+
         public static bool IsBattling { get; private set; }
+        public static bool IsBattlingFinished { get; private set; }
 
         //Game
         private static Entity rollsLeftEntity;
@@ -26,6 +30,9 @@ namespace Game
 
         private static Entity diceSlotsEntity;
         private static Entity diceSlotsSymbol;
+
+        private static Entity coinsEntity;
+        private static Entity coinsSymbol;
 
         private static Entity livesEntity;
         private static TextDescription livesDescription;
@@ -35,6 +42,9 @@ namespace Game
         private static TextDescription battleEnemyDescription;
 
         private static Entity battleCursorEntity;
+
+        private static Entity battleEndEntity;
+        private static Entity battleEndButtonEntity;
 
 
         public static int NumberOfDiceInPlay()
@@ -66,6 +76,12 @@ namespace Game
             Program.GameLocation.AddEntity(diceSlotsEntity);
             Program.GameLocation.AddEntity(diceSlotsSymbol);
 
+            coinsEntity = new Entity(new TextDescription($"{Coins:000}", 40, 30));
+            coinsSymbol = new Entity(new Description2D(Sprite.Sprites["Symbols"], 40 + 40, 30 + 12));
+            ((Description2D)coinsSymbol.Description).ImageIndex = 7;
+            Program.GameLocation.AddEntity(coinsEntity);
+            Program.GameLocation.AddEntity(coinsSymbol);
+
             rollsLeftEntity = new Entity(new TextDescription($"{RollsLeft}/{MaxRolls}", 100, 10));
             rollsLeftSymbol = new Entity(new Description2D(Sprite.Sprites["Symbols"], 100 + 40, 10 + 12));
             ((Description2D)rollsLeftSymbol.Description).ImageIndex = 4;
@@ -81,12 +97,18 @@ namespace Game
             Program.BattleLocation.AddEntity(battleCursorEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], 0, 0)));
             ((Description2D)battleCursorEntity.Description).ImageIndex = 10;
 
+
+            battleEndEntity = new Entity(new TextDescription("End Battle", Program.Width / 2 - 64, Program.Height - 24));
+            battleEndButtonEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], Program.Width / 2 + 32, Program.Height - 12));
+            (battleEndButtonEntity.Description as Description2D).ImageIndex = 5;
         }
 
         public static void Reset()
         {
             RollsLeft = MaxRolls;
             CurrentDiceInPlay = 0;
+
+            (rollsLeftEntity.Description as TextDescription).ChangeText($"{RollsLeft}/{MaxRolls}");
         }
 
         public static void EndBattle()
@@ -106,7 +128,7 @@ namespace Game
             if (battleDice.Count == 0)
             {
                 Lives--;
-                if (Lives == 0)
+                if (Lives == 0 || Program.DiceBag.Count == 0)
                 {
                     Program.Engine.SetLocation(Program.GameState, Program.GameOverLocation);
                     return;
@@ -118,6 +140,9 @@ namespace Game
                 }
             }
 
+            Program.BattleLocation.RemoveEntity(battleEndEntity.Id);
+            Program.BattleLocation.RemoveEntity(battleEndButtonEntity.Id);
+
             // TODO: MAJOR BUG, the engine needs another tick to remove entities, but doesn't get a tick until it load again.
             // This could be fine if you don't try to add the same entities back in, but adding is done first. Maybe swap the order of remove and add?
             // Don't add and silently continue because then they'll be removed
@@ -125,6 +150,28 @@ namespace Game
             Program.Engine.SetLocation(Program.GameState, Program.GameLocation);
 
             Reset();
+        }
+
+        public static void OpenShop()
+        {
+            Program.Engine.SetLocation(Program.GameState, Program.ShopLocation);
+        }
+        public static void HealDice(List<Dice> diceList)
+        {
+            foreach (Dice dice in diceList)
+            {
+                dice.Heal(10);
+            }
+
+            Reset();
+        }
+        public static void UpgradeDice(List<Dice> diceList)
+        {
+            Program.Engine.SetLocation(Program.GameState, Program.UpgradeLocation);
+        }
+        public static void RecruitDice(List<Dice> diceList)
+        {
+            Program.Engine.SetLocation(Program.GameState, Program.RecruitLocation);
         }
 
         private static int battleEnemyHealth;
@@ -135,6 +182,7 @@ namespace Game
         public static void InitBattle(List<Dice> diceToBattle, int health, int attack)
         {
             IsBattling = true;
+            IsBattlingFinished = false;
             battleEnemyHealth = health;
             battleEnemyAttack = attack;
             turn = 0;
@@ -203,15 +251,28 @@ namespace Game
         static int actionTimer = 0;
         public static void Tick(object sender, GameState state)
         {
-            if (IsBattling)
+            if (IsBattling && !IsBattlingFinished)
             {
-                if (++timer % Program.FPS == 1)
+                if (++timer % (Program.FPS / 2) == 1)
                 {
                     if (BattleStep())
                     {
-                        EndBattle();
+                        IsBattlingFinished = true;
+                        Program.BattleLocation.AddEntity(battleEndEntity);
+                        Program.BattleLocation.AddEntity(battleEndButtonEntity);
                     }
                     actionTimer++;
+                }
+            }
+            if (IsBattlingFinished)
+            {
+                if (state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (info != null && (battleEndButtonEntity.Description as Description2D).IsCollision(new Description2D(info.X + (battleEndButtonEntity.Description as Description2D).Sprite.X, info.Y + (battleEndButtonEntity.Description as Description2D).Sprite.Y, 1, 1)))
+                    {
+                        EndBattle();
+                    }
                 }
             }
             if (!IsBattling)

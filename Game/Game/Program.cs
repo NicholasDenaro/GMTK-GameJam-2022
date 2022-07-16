@@ -42,7 +42,7 @@ namespace Game
                 .GameFrame(new GameUI(
                     new AvaloniaWindowBuilder()
                         .StartupLocation(Avalonia.Controls.WindowStartupLocation.CenterScreen)
-                        .Title("Game")
+                        .Title("Dicey Guildkeeper")
                     , 0, 0, Width, Height, 2, 2
                     ))
                 .Controller(new WindowsMouseController(mouseMap))
@@ -69,7 +69,7 @@ namespace Game
 
         private static void MainMenuSetup()
         {
-            MenuLocation.AddEntity(new Entity(new TextDescription("Welcome to game", Program.Width / 2 - ("Welcome to game".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
+            MenuLocation.AddEntity(new Entity(new TextDescription("      Welcome to\n Dicey Guildkeeper", Program.Width / 2 - ("Dicey Guildkeeper".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
             Engine.TickEnd(0) += (object sender, GameState state) =>
             {
                 if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
@@ -109,11 +109,11 @@ namespace Game
             //    //diceBag.AddDice(Dice.Create(DicePresets[keys[Random.Next(DicePresets.Count)]], 60 + i * 40, 60));
             //}
 
-            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
-            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
-            DiceBag.AddDice(Dice.Create(DicePresets["Red Warrior"], 0, 0));
-            DiceBag.AddDice(Dice.Create(DicePresets["Red Archer"], 0, 0));
-            DiceBag.AddDice(Dice.Create(DicePresets["Red Healer"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresetsT1["Red Warrior"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresetsT1["Red Warrior"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresetsT1["Red Archer"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresetsT1["Red Archer"], 0, 0));
+            DiceBag.AddDice(Dice.Create(DicePresetsT1["Red Healer"], 0, 0));
 
             GameLocation.AddEntity(DiceBag);
         }
@@ -138,7 +138,7 @@ namespace Game
 
         public enum Keys { CLICK, RCLICK, ROLL, MOUSEINFO }
 
-        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)> DicePresets = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)>()
+        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health, int numRolls)> DicePresetsT1 = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health, int numRolls)>()
         {
             { "Red Warrior",
                 (Sides.FOUR,
@@ -149,17 +149,19 @@ namespace Game
                     Faces.SWORD,
                     Faces.SHIELD
                 }, 
-                health: 3) },
+                health: 3,
+                numRolls: 1) },
             { "Red Archer",
                 (Sides.FOUR,
                 Colors.RED,
                 new []{
                     Faces.BOW,
-                    Faces.SHIELD,
+                    Faces.BOW,
                     Faces.BOW,
                     Faces.SHIELD
                 },
-                health: 2) },
+                health: 2,
+                numRolls: 1) },
             { "Red Healer",
                 (Sides.FOUR,
                 Colors.RED,
@@ -169,7 +171,8 @@ namespace Game
                     Faces.HEAL,
                     Faces.SHIELD
                 },
-                health: 1) },
+                health: 1,
+                numRolls: 1) },
             { "Blue Warrior",
                 (Sides.FOUR,
                 Colors.BLUE,
@@ -179,7 +182,59 @@ namespace Game
                     Faces.SWORD,
                     Faces.SHIELD
                 },
-                health: 4) },
+                health: 4,
+                numRolls: 1) },
+            { "Green Archer",
+                (Sides.SIX,
+                Colors.GREEN,
+                new []{
+                    Faces.BOW,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.BOW,
+                    Faces.BOW,
+                    Faces.SHIELD
+                },
+                health: 3,
+                numRolls: 1) },
+            { "Green Squire",
+                (Sides.SIX,
+                Colors.GREEN,
+                new []{
+                    Faces.SWORD,
+                    Faces.HEAL,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.HEAL
+                },
+                health: 6,
+                numRolls: 1) },
+            { "Yellow Cleric",
+                (Sides.FOUR,
+                Colors.GREEN,
+                new []{
+                    Faces.HEAL,
+                    Faces.HEAL,
+                    Faces.SWORD,
+                    Faces.HEAL,
+                },
+                health: 3,
+                numRolls: 1) },
+        };
+
+        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)> DicePresetsT2 = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)>()
+        {
+            { "Yellow Warrior",
+                (Sides.FOUR,
+                Colors.YELLOW,
+                new []{
+                    Faces.SWORD,
+                    Faces.SWORD,
+                    Faces.SWORD,
+                    Faces.SHIELD
+                },
+                health: 6) },
             { "Green Squire",
                 (Sides.SIX,
                 Colors.GREEN,
@@ -192,6 +247,30 @@ namespace Game
                     Faces.HEAL
                 },
                 health: 6) },
+            { "Red Knight",
+                (Sides.SIX,
+                Colors.RED,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                },
+                health: 6) },
+            { "Red Berserker",
+                (Sides.SIX,
+                Colors.RED,
+                new []{
+                    Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SWORD,
+                    Faces.SWORD,
+                    Faces.SWORD,
+                },
+                health: 4) },
             { "Green Knight",
                 (Sides.EIGHT,
                 Colors.GREEN,
@@ -206,28 +285,50 @@ namespace Game
                     Faces.SHIELD
                 },
                 health: 8) },
-            { "Yellow Prince",
-                (Sides.TEN,
+        };
+
+        public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)> DicePresetsT3 = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health)>()
+        {
+            { "Red Hero",
+                (Sides.TWELVE,
                 Colors.YELLOW,
                 new []{
                     Faces.SWORD,
                     Faces.SHIELD,
                     Faces.SWORD,
+                    Faces.SHIELD,
+                    Faces.SHIELD,
+                    Faces.SWORD,
+                    Faces.SWORD,
                     Faces.HEAL,
                     Faces.SHIELD,
                     Faces.SWORD,
-                    Faces.SHIELD,
                     Faces.SWORD,
+                    Faces.SWORD
+                },
+                health: 10) },
+            { "Yellow Bishop",
+                (Sides.TEN,
+                Colors.YELLOW,
+                new []{
+                    Faces.HEAL,
+                    Faces.HEAL,
+                    Faces.HEAL,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.HEAL,
+                    Faces.HEAL,
                     Faces.SHIELD,
                     Faces.SWORD
                 },
-                health: 3) },
+                health: 5) },
             { "Blue Paladin",
                 (Sides.TWELVE,
                 Colors.BLUE,
                 new []{
-                    Faces.SWORD,
                     Faces.SHIELD,
+                    Faces.SWORD,
                     Faces.HEAL,
                     Faces.SHIELD,
                     Faces.SWORD,
@@ -244,8 +345,8 @@ namespace Game
                 (Sides.TWENTY,
                 Colors.YELLOW,
                 new []{
-                    Faces.SWORD,
                     Faces.SHIELD,
+                    Faces.SWORD,
                     Faces.SHIELD,
                     Faces.SHIELD,
                     Faces.SHIELD,
@@ -266,6 +367,32 @@ namespace Game
                     Faces.SHIELD
                 },
                 health: 15) },
+            { "Green Sniper",
+                (Sides.TWENTY,
+                Colors.YELLOW,
+                new []{
+                    Faces.BOW,
+                    Faces.BOW,
+                    Faces.SHIELD,
+                    Faces.BOW,
+                    Faces.BOW,
+                    Faces.HEAL,
+                    Faces.BOW,
+                    Faces.BOW,
+                    Faces.SWORD,
+                    Faces.BOW,
+                    Faces.SHIELD,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.BOW,
+                    Faces.SWORD,
+                    Faces.BOW,
+                    Faces.BOW,
+                    Faces.HEAL,
+                    Faces.SHIELD,
+                    Faces.BOW
+                },
+                health: 8) },
         };
     }
 }
