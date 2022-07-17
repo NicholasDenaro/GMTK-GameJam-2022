@@ -71,6 +71,10 @@ namespace Game
                     this.isInfoShown = false;
                 }
             }
+            else
+            {
+                mouseDragging = false;
+            }
 
             if (!mouseDragging)
             {
