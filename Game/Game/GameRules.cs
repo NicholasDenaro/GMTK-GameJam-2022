@@ -628,7 +628,7 @@ namespace Game
                 else
                 {
                     int damage = battleEnemyAttack - battleShield;
-                    if (damage == 0)
+                    if (damage <= 0)
                     {
                         Program.PlayBlockedSound();
                     }

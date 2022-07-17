@@ -34,7 +34,7 @@ namespace Game
         public const int Height = 320;
 
         public static bool Mute { get; set; } = false;
-        public static bool Quiet { get; set; } = false;
+        public static bool Quiet { get; set; } = true;
         public static Entity MuteEntity { get; private set; }
         public static Entity MuteTextEntity { get; private set; }
 
@@ -57,6 +57,9 @@ namespace Game
         public static Description2D PlayArea { get; private set; }
 
         public static DiceBag DiceBag { get; private set; }
+
+        private static NAudioMMLTrack battleMusic;
+        private static NAudioMMLTrack ambientMusic;
 
         static async Task Main()
         {
@@ -93,6 +96,8 @@ namespace Game
             new Sprite("JamLogo", "Sprites.Jam Logo 2022.png", 1920, 1053, 0, 0);
             new Sprite("Title", "Sprites.Title.png", 128, 80, 64, 0);
 
+            ambientMusic = new NAudioMMLTrack(SinWaveSound.Waves.PIANO, new GameEngine.UI.Audio.MML("t120l4 a+b+>c+<b e8g8b8e8d8a8e+4."));
+            SoundPlayer.PlayTrack(ambientMusic);
 
             Description2D d2d;
             Description2D d2dMute;
@@ -102,7 +107,7 @@ namespace Game
             d2d.ImageIndex = 9;
             d2d.ZIndex = 1000;
 
-            QuietTextEntity = new Entity(d2d = new TextDescription("Quiet:", Program.Width - 144, -4));
+            QuietTextEntity = new Entity(d2d = new TextDescription("Ambiance:", Program.Width - 144 - 40, -4));
             QuietEntity = new Entity(d2d = d2dQuiet = new Description2D(Sprite.Sprites["Symbols"], Program.Width - 96 + 10, 8));
             d2d.ImageIndex = 5;
             d2d.ZIndex = 1000;
@@ -159,14 +164,14 @@ namespace Game
                     {
                         if (Quiet)
                         {
-                            d2dQuiet.ImageIndex -= 1;
+                            d2dQuiet.ImageIndex += 1;
                             Quiet = false;
                         }
                         else
                         {
-                            d2dQuiet.ImageIndex += 1;
+                            d2dQuiet.ImageIndex -= 1;
                             Quiet = true;
-                            //StopSounds();
+                            StopSounds();
                         }
                     }
                 }
@@ -179,7 +184,7 @@ namespace Game
         {
             Description2D d2dQuiet = QuietEntity.Description as Description2D;
 
-            d2dQuiet.ImageIndex = 6;
+            d2dQuiet.ImageIndex = 5;
             Quiet = true;
             StopSounds();
         }
