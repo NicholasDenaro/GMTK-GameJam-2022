@@ -3,6 +3,7 @@ using GameEngine._2D;
 using GameEngine.UI;
 using GameEngine.UI.AvaloniaUI;
 using GameEngine.UI.Controllers;
+using GameEngine.UI.NAudio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,12 @@ namespace Game
         public static readonly Random Random = new Random();
 
         public static GameEngine.GameEngine Engine;
+        public static GameUI UI;
         public const int GameState = 0;
         public const int Width = 480;
         public const int Height = 320;
+
+        public static bool Mute { get; set; } = false;
 
         public static Location GameLocation { get; private set; }
         public static Location MenuLocation { get; private set; }
@@ -36,7 +40,7 @@ namespace Game
 
         static async Task Main()
         {
-            (Engine, GameUI ui) = new GameBuilder()
+            (Engine, UI) = new GameBuilder()
                 .GameEngine(new FixedTickEngine(FPS))
                 .GameView(new GameView2D(new Drawer2DAvalonia(), Width, Height, 2, 2, Color.Gray))
                 .GameFrame(new GameUI(
@@ -48,6 +52,7 @@ namespace Game
                 .Controller(new WindowsMouseController(mouseMap))
                 .Controller(new WindowsKeyController(keyMap))
                 .StartingLocation(MenuLocation = new Location(new Description2D(0, 0, Width, Height)))
+                .SoundPlayer(new NAudioSoundPlayer(7))
                 .Build();
 ;
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
@@ -70,6 +75,112 @@ namespace Game
             Engine.SetLocation(GameState, MenuLocation);
 
             await Engine.Start();
+        }
+
+        static List<string> rollingSounds = new List<string>()
+        {
+            "Sounds.longdice.wav",
+            "Sounds.mediumdice.wav",
+            "Sounds.mediumdice2.wav",
+            "Sounds.mediumdice3.wav",
+            "Sounds.mediumdice4.wav",
+            "Sounds.shortdice.wav",
+            "Sounds.shortdice2.wav",
+            "Sounds.shortdice3.wav",
+        };
+
+        static List<string> collisionSounds = new List<string>()
+        {
+            "Sounds.collidedice.wav",
+            "Sounds.collidedice2.wav",
+            "Sounds.collidedice3.wav",
+        };
+
+        public static void PlayRollingDice()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource(rollingSounds[Program.Random.Next(rollingSounds.Count)]);
+            }
+        }
+
+        public static void PlayQuickRollingDice()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.shortdice2.wav");
+            }
+        }
+
+        public static void PlayCollisionDice()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource(collisionSounds[Program.Random.Next(collisionSounds.Count)]);
+            }
+        }
+
+        public static void PlayBowSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.bow2.wav");
+            }
+        }
+
+        public static void PlayAttackSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.attack.wav");
+            }
+        }
+
+        public static void PlayBlockedSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.blocked.wav");
+            }
+        }
+
+        public static void PlayDamageSound(bool blocked)
+        {
+            if (!Mute)
+            {
+                if (blocked)
+                {
+                    UI.PlayResource("Sounds.damage.wav");
+                }
+                else
+                {
+                    UI.PlayResource("Sounds.damage2.wav");
+                }
+            }
+        }
+
+        public static void PlayArrowSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.arrow.wav");
+            }
+        }
+
+        public static void PlayCoinSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.coin.wav");
+            }
+        }
+
+        public static void PlayHealSound()
+        {
+            if (!Mute)
+            {
+                UI.PlayResource("Sounds.heal.wav");
+            }
         }
 
         private static void MainMenuSetup()

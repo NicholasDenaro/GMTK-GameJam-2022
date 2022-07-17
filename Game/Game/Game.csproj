@@ -9,6 +9,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Sounds\arrow.wav" />
+    <None Remove="Sounds\attack.wav" />
+    <None Remove="Sounds\blocked.wav" />
+    <None Remove="Sounds\bow.wav" />
+    <None Remove="Sounds\bow2.wav" />
+    <None Remove="Sounds\coin.wav" />
+    <None Remove="Sounds\collidedice.wav" />
+    <None Remove="Sounds\collidedice2.wav" />
+    <None Remove="Sounds\collidedice3.wav" />
+    <None Remove="Sounds\damage.wav" />
+    <None Remove="Sounds\damage2.wav" />
+    <None Remove="Sounds\heal.wav" />
+    <None Remove="Sounds\longdice.wav" />
+    <None Remove="Sounds\mediumdice.wav" />
+    <None Remove="Sounds\mediumdice2.wav" />
+    <None Remove="Sounds\mediumdice3.wav" />
+    <None Remove="Sounds\mediumdice4.wav" />
+    <None Remove="Sounds\shortdice.wav" />
+    <None Remove="Sounds\shortdice2.wav" />
+    <None Remove="Sounds\shortdice3.wav" />
     <None Remove="Sprites\button.png" />
     <None Remove="Sprites\desk.png" />
     <None Remove="Sprites\desk2.png" />
@@ -20,6 +40,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Sounds\arrow.wav" />
+    <EmbeddedResource Include="Sounds\attack.wav" />
+    <EmbeddedResource Include="Sounds\blocked.wav" />
+    <EmbeddedResource Include="Sounds\bow.wav" />
+    <EmbeddedResource Include="Sounds\bow2.wav" />
+    <EmbeddedResource Include="Sounds\coin.wav" />
+    <EmbeddedResource Include="Sounds\collidedice.wav" />
+    <EmbeddedResource Include="Sounds\collidedice2.wav" />
+    <EmbeddedResource Include="Sounds\collidedice3.wav" />
+    <EmbeddedResource Include="Sounds\damage.wav" />
+    <EmbeddedResource Include="Sounds\damage2.wav" />
+    <EmbeddedResource Include="Sounds\heal.wav" />
+    <EmbeddedResource Include="Sounds\longdice.wav" />
+    <EmbeddedResource Include="Sounds\mediumdice.wav" />
+    <EmbeddedResource Include="Sounds\mediumdice2.wav" />
+    <EmbeddedResource Include="Sounds\mediumdice3.wav" />
+    <EmbeddedResource Include="Sounds\mediumdice4.wav" />
+    <EmbeddedResource Include="Sounds\shortdice.wav" />
+    <EmbeddedResource Include="Sounds\shortdice2.wav" />
+    <EmbeddedResource Include="Sounds\shortdice3.wav" />
     <EmbeddedResource Include="Sprites\button.png" />
     <EmbeddedResource Include="Sprites\desk.png" />
     <EmbeddedResource Include="Sprites\desk2.png" />

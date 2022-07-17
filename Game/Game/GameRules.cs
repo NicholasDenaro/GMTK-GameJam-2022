@@ -208,13 +208,13 @@ namespace Game
 
                 int cost = (upgradeIndex % 2 == 0 ? 2 : 3) * (1 + upgradeIndex / 2);
 
-                int x = Program.Width / numDice / 2 + i * Program.Width / numDice - Program.Width / numDice / 2;
+                int x = Program.Width / (numDice + 2) / 2 + (i + 1) * Program.Width / (numDice + 2) - Program.Width / (numDice + 2) / 2;
                 int y = 80;
 
                 Program.UpgradeLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["dice"], x + 16, y - 24)));
                 d2d.ImageIndex = (dice.Description as Description2D).ImageIndex;
 
-                dice.ForceShowInfo(Program.UpgradeLocation);
+                dice.ForceShowInfo(Program.UpgradeLocation, x - 24, y + 32);
 
                 Program.UpgradeLocation.AddEntity(ent = new Entity(new TextDescription($"{cost:00}", x + 16 - 14, y + 96 - 10)));
                 Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16 + 14, y + 96 + 2)));
@@ -473,6 +473,14 @@ namespace Game
                     {
                         case Program.Faces.SWORD:
                         case Program.Faces.BOW:
+                            if (face == Program.Faces.SWORD)
+                            {
+                                Program.PlayAttackSound();
+                            }
+                            else
+                            {
+                                Program.PlayBowSound();
+                            }
                             battleEnemyHealth--;
                             battleEnemyDescription.ChangeText($"{battleEnemyHealth}♥ {battleEnemyAttack}⸸");
                             break;
@@ -484,6 +492,7 @@ namespace Game
                             if (target != null)
                             {
                                 target.Heal(1);
+                                Program.PlayHealSound();
                             }
                             break;
                         default:
@@ -493,7 +502,19 @@ namespace Game
                 else
                 {
                     int damage = battleEnemyAttack - battleShield;
-                    battleShield -= battleEnemyAttack;
+                    if (damage == 0)
+                    {
+                        Program.PlayBlockedSound();
+                    }
+                    else if (battleShield == 0)
+                    {
+                        Program.PlayDamageSound(false);
+                    }
+                    else
+                    {
+                        Program.PlayDamageSound(true);
+                    }
+
                     battleShield = 0;
                     if (damage > 0 && battleDice[0].Damage(damage))
                     {

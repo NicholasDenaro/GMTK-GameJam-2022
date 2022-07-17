@@ -277,17 +277,25 @@ namespace Game
                 double angle = Program.Random.NextDouble() * Math.PI * 2;
                 this.velocity = (Math.Cos(angle) * 8, Math.Sin(angle) * 8);
                 this.SetRollingTime();
+                Program.PlayRollingDice();
             }
             else
             {
                 this.index = Program.Random.Next(this.Faces.Length);
                 this.rollingTime = Program.FPS / 2;
                 this.fastRolling = true;
+                Program.PlayQuickRollingDice();
             }
         }
 
         public void ForceShowInfo(Location location)
         {
+            this.diceInfoEntity.Display(location);
+        }
+
+        public void ForceShowInfo(Location location, int x, int y)
+        {
+            this.ChangeCoordsDelta(x - this.description.X, y - this.description.Y);
             this.diceInfoEntity.Display(location);
         }
 
@@ -432,23 +440,35 @@ namespace Game
             {
                 ChangeCoordsDelta(this.velocity.x, 0);
 
-                if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
+                bool collide = false;
+                if (collide = state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
                     || this.description.X < Program.Width / 2 - 48 + 32
                     || this.description.X > Program.Width - 32)
                 {
                     ChangeCoordsDelta(-this.velocity.x, 0);
                     velocity.x *= -1;
+
+                    if (collide)
+                    {
+                        Program.PlayCollisionDice();
+                    }
                 }
 
 
                 ChangeCoordsDelta(0, this.velocity.y);
 
+                collide = false;
                 if (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => dice.description.IsCollision(this.description))
                     || this.description.Y < 32
                     || this.description.Y > Program.Height - 96 - 32)
                 {
                     ChangeCoordsDelta(0, -this.velocity.y);
                     velocity.y *= -1;
+
+                    if (collide)
+                    {
+                        Program.PlayCollisionDice();
+                    }
                 }
 
                 velocity.x *= 0.95;
