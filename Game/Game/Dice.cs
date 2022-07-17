@@ -45,6 +45,7 @@ namespace Game
         public bool IsFullHealth => this.health == this.maxHealth;
         private bool fastRolling;
         public Faces Face => (Faces)this.Faces[index % this.Faces.Length];
+        public int Sides => this.Faces.Length;
 
         private int rollingTime = -1;
         private (double x, double y) avgVel = (0, 0);
@@ -81,6 +82,59 @@ namespace Game
             velocity = (0, 0);
 
             this.diceInfoEntity = new DiceInfoEntity(this, x, y);
+        }
+
+        public void Upgrade()
+        {
+            int upgradeIndex = Program.SidesToUpgradeIndex[this.Sides];
+
+            (Sides sides, Colors color, Faces[] faces, int health, int numRolls) info;
+
+            List<string> upgradeTree;
+
+            if (this.description.ImageIndex / 6 == 0)
+            {
+                upgradeTree = Program.WarriorUpgrades;
+            }
+            else if (this.description.ImageIndex / 6 == 1)
+            {
+                upgradeTree = Program.HealerUpgrades;
+            }
+            else if (this.description.ImageIndex / 6 == 2)
+            {
+                upgradeTree = Program.ArcherUpgrades;
+            }
+            else
+            {
+                // TODO yellow?
+                upgradeTree = Program.WarriorUpgrades;
+            }
+
+            if (upgradeIndex < 1)
+            {
+                info = Program.DicePresetsT1[upgradeTree[upgradeIndex + 1]];
+            }
+            else if (upgradeIndex < 3)
+            {
+                info = Program.DicePresetsT2[upgradeTree[upgradeIndex + 1]];
+            }
+            else
+            {
+                info = Program.DicePresetsT3[upgradeTree[upgradeIndex + 1]];
+            }
+
+            this.maxHealth = info.health;
+            this.health = info.health;
+            this.NumRolls = info.numRolls;
+            this.sides = (int)info.sides;
+            this.Faces = info.faces.Select(f => (int)f).ToArray();
+            index = 0;
+            this.descriptionFace.ImageIndex = this.Faces[index];
+            this.descriptionFace.ZIndex = 1;
+            this.description.ImageIndex = sidesToIndex(sides) + (int)info.color * 6;
+            this.Heal(1);
+
+            this.diceInfoEntity = new DiceInfoEntity(this, (int)this.description.X, (int)this.description.Y);
         }
 
         private void ResetPositions()

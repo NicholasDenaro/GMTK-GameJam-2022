@@ -195,6 +195,48 @@ namespace Game
             }
             Program.Engine.SetLocation(Program.GameState, Program.UpgradeLocation);
 
+            Description2D d2d;
+            Entity ent;
+
+            int numDice = diceList.Count;
+
+            for (int i = 0; i < numDice; i++)
+            {
+                Dice dice = diceList[i];
+
+                int upgradeIndex = Program.SidesToUpgradeIndex[dice.Sides];
+
+                int cost = (upgradeIndex % 2 == 0 ? 2 : 3) * (1 + upgradeIndex / 2);
+
+                int x = Program.Width / numDice / 2 + i * Program.Width / numDice - Program.Width / numDice / 2;
+                int y = 80;
+
+                Program.UpgradeLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["dice"], x + 16, y - 24)));
+                d2d.ImageIndex = (dice.Description as Description2D).ImageIndex;
+
+                dice.ForceShowInfo(Program.UpgradeLocation);
+
+                Program.UpgradeLocation.AddEntity(ent = new Entity(new TextDescription($"{cost:00}", x + 16 - 14, y + 96 - 10)));
+                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16 + 14, y + 96 + 2)));
+                d2d.ImageIndex = 7;
+
+                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16, y + 112)));
+                d2d.ImageIndex = 5;
+                ent.TickAction += (state, entity) =>
+                {
+                    Description2D description = entity.Description as Description2D;
+                    if (GameRules.Coins >= cost && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                    {
+                        MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                        if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                        {
+                            description.ImageIndex = 6;
+                            dice.Upgrade();
+                            GameRules.Coins -= cost;
+                        }
+                    }
+                };
+            }
         }
 
         public static void RecruitDice()

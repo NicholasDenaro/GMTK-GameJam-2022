@@ -244,6 +244,46 @@ namespace Game
 
         public enum Keys { CLICK, RCLICK, ROLL, MOUSEINFO }
 
+        public static Dictionary<int, int> SidesToUpgradeIndex { get; private set; } = new Dictionary<int, int>()
+        {
+            { 4, 0 },
+            { 6, 1 },
+            { 8, 2 },
+            { 10, 3 },
+            { 12, 4 },
+            { 20, 5 },
+        };
+
+        public static List<string> WarriorUpgrades { get; private set; } = new List<string>()
+        {
+            "Warrior",
+            "Squire",
+            "Knight",
+            "Paladin",
+            "HighPaladin",
+            "HonedSword"
+        };
+
+        public static List<string> ArcherUpgrades { get; private set; } = new List<string>()
+        {
+            "Archer",
+            "Sharpshooter",
+            "Huntsman",
+            "EagleEye",
+            "MasterHunter",
+            "PerfectShot"
+        };
+
+        public static List<string> HealerUpgrades { get; private set; } = new List<string>()
+        {
+            "Healer",
+            "Cleric",
+            "Bishop",
+            "HighBishop",
+            "Divinator",
+            "BlessedWords"
+        };
+
         public static Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health, int numRolls)> DicePresetsT1 = new Dictionary<string, (Sides sides, Colors color, Faces[] faces, int health, int numRolls)>()
         {
             { "Warrior",
