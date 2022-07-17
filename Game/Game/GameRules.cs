@@ -107,8 +107,9 @@ namespace Game
 
             Program.GameLocation.AddEntity(livesEntity = new Entity(livesDescription = new TextDescription(new string('♥', Lives), 160, 10)));
 
-            // Showw level
+            // Show level
             Program.GameLocation.AddEntity(levelEntity = new Entity(new TextDescription($"Level {Program.Scorecard.Level + 1} / 4", 160 - 52, 30)));
+            Program.GameLocation.AddEntity(levelEntity = new Entity(new TextDescription($"Draw dice from the bag\nby click and dragging", 192 + 16, 192 + 32 + 48 + 8, 10)));
 
             Program.Engine.TickEnd(0) += GameRules.Tick;
 

@@ -75,7 +75,7 @@ namespace Game
                 .Controller(new WindowsMouseController(mouseMap))
                 .Controller(new WindowsKeyController(keyMap))
                 .StartingLocation(MenuLocation = new Location(new Description2D(0, 0, Width, Height)))
-                .SoundPlayer(SoundPlayer = new NAudioSoundPlayer(SOUNDCHANNEL))
+                .SoundPlayer(SoundPlayer = new NAudioSoundPlayer())
                 .Build();
 ;
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
@@ -337,7 +337,7 @@ namespace Game
         {
             // TODO: Expose a way to stop sound through the game's sound player abstraction
             // Info: The sound buffer isn't being cleared, and is being re-used when another sound starts up again
-            _soundPlayer.Stop();
+            //_soundPlayer.Stop();
             //NAudio.Wave.WaveOutBuffer[] buffers = typeof(NAudio.Wave.WaveOutEvent).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "buffers").GetValue(_soundPlayer) as NAudio.Wave.WaveOutBuffer[];
             
             // This doesn't seem to work
