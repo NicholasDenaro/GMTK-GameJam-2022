@@ -295,22 +295,25 @@ namespace Game
                     }
                 }
 
-                if (!showInfo)
+                if (!GameRules.IsBattling)
                 {
-                    MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
-                    if (info != null && description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    if (!showInfo)
                     {
-                        showInfo = true;
-                        this.diceInfoEntity.Display();
+                        MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
+                        if (info != null && description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                        {
+                            showInfo = true;
+                            this.diceInfoEntity.Display();
+                        }
                     }
-                }
-                else
-                {
-                    MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
-                    if (GameRules.IsBattling || info != null && !description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                    else
                     {
-                        showInfo = false;
-                        this.diceInfoEntity.Hide();
+                        MouseControllerInfo info = state.Controllers[0][Keys.MOUSEINFO].Info as MouseControllerInfo;
+                        if (GameRules.IsBattling || info != null && !description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
+                        {
+                            showInfo = false;
+                            this.diceInfoEntity.Hide();
+                        }
                     }
                 }
             }
