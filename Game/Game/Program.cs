@@ -114,7 +114,6 @@ namespace Game
                         //GameRules.UpgradeDice(dice);
                         //GameRules.RecruitDice();
 
-
                         StopSounds();
                     }
                 }
@@ -133,6 +132,7 @@ namespace Game
                         {
                             d2d.ImageIndex -= 1;
                             Mute = true;
+                            StopSounds();
                         }
                     }
                 }

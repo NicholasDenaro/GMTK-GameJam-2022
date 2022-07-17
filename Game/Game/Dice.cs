@@ -1,12 +1,9 @@
 ﻿using GameEngine;
 using GameEngine._2D;
-using GameEngine.Interfaces;
 using GameEngine.UI.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Game.Program;
 
 namespace Game
@@ -14,6 +11,10 @@ namespace Game
     internal class Dice : Entity
     {
         public const double minVelocity = 0.01;
+
+        public const double velocityDropoff = 0.92;
+
+        public const int DirectionChangeTime = Program.FPS / 6;
 
         private Description2D description;
 
@@ -317,7 +318,7 @@ namespace Game
             if (withVelocity)
             {
                 double angle = Program.Random.NextDouble() * Math.PI * 2;
-                this.velocity = (Math.Cos(angle) * 8, Math.Sin(angle) * 8);
+                this.velocity = (Math.Cos(angle) * 20, Math.Sin(angle) * 20);
                 this.SetRollingTime();
                 Program.PlayRollingDice();
             }
@@ -343,10 +344,11 @@ namespace Game
 
         private void SetRollingTime()
         {
-            this.rollingTime = (int)Math.Log(minVelocity / Math.Max(Math.Abs(this.velocity.x), Math.Abs(this.velocity.y)), 0.95);
+            this.rollingTime = (int)Math.Log(minVelocity / Math.Max(Math.Abs(this.velocity.x), Math.Abs(this.velocity.y)), velocityDropoff);
         }
 
         private Point lastMousePos;
+        private int timeSinceLastDirectionChange = DirectionChangeTime;
         public override void Tick(GameState state)
         {
             // Pickup
@@ -513,8 +515,8 @@ namespace Game
                     }
                 }
 
-                velocity.x *= 0.95;
-                velocity.y *= 0.95;
+                velocity.x *= 0.90;
+                velocity.y *= 0.90;
                 if (!(Math.Abs(this.velocity.x) - minVelocity > 0 || Math.Abs(this.velocity.y) - minVelocity > 0))
                 {
                     Console.WriteLine("stopped moving");
@@ -524,25 +526,43 @@ namespace Game
             // Face rolling
             if (this.IsRolling && --this.rollingTime > 0)
             {
+                bool newFace = false;
                 if (this.fastRolling || (this.rollingTime > 2 * Program.FPS && this.rollingTime % 2 == 0))
                 {
                     descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
+                    newFace = true;
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 3 == 0)
                 {
                     descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
+                    newFace = true;
                 }
                 else if (this.rollingTime > 1.5 * Program.FPS && this.rollingTime % 6 == 0)
                 {
                     descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
+                    newFace = true;
                 }
                 else if (this.rollingTime > 1 * Program.FPS && this.rollingTime % 8 == 0)
                 {
                     descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
+                    newFace = true;
                 }
                 else if (this.rollingTime % 10 == 0)
                 {
                     descriptionFace.ImageIndex = this.Faces[++index % this.Faces.Length];
+                    newFace = true;
+                }
+
+                if (timeSinceLastDirectionChange-- <= 0 && newFace && !this.fastRolling)
+                {
+                    double direction = Math.Atan2(this.velocity.y, this.velocity.x);
+                    double magnitude = Math.Sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+
+                    double spread = Math.PI / 3;
+                    direction = direction + (Program.Random.NextDouble() * spread - spread / 2) * 3;
+
+                    this.velocity = (Math.Cos(direction) * magnitude, Math.Sin(direction) * magnitude);
+                    timeSinceLastDirectionChange = DirectionChangeTime;
                 }
             }
             else if (this.rollingTime == 0)
