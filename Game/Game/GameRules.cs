@@ -178,6 +178,15 @@ namespace Game
                 dice.Despawn();
                 Program.DiceBag.AddDice(dice);
             }
+
+            foreach (Entity entity in Program.ShopLocation.Entities.Where(entity => (entity.Description as Description2D).Sprite?.Name == "Symbols"))
+            {
+                Description2D description = entity.Description as Description2D;
+                if (description.ImageIndex == 6)
+                {
+                    description.ImageIndex = 5;
+                }
+            }
         }
 
         public static void CloseShop()
@@ -402,7 +411,7 @@ namespace Game
             battleEnemyDescription.ChangeText(info);
             battleEnemyDescription.SetCoords(Program.Width / 2 - 22, 30);
             (battleEnemyImageEntity.Description as Description2D).SetCoords(Program.Width / 2, 64);
-            (battleEnemyImageEntity.Description as Description2D).ImageIndex = 18 + Program.Scorecard.Level + (Program.Scorecard.CurrentQuestIndex < Program.Scorecard.QuestCount / 2 ? 0 : 1);
+            (battleEnemyImageEntity.Description as Description2D).ImageIndex = 18 + Program.Scorecard.Level * 2 + (Program.Scorecard.CurrentQuestIndex < Program.Scorecard.QuestCount / 2 ? 0 : 1);
 
             List<Dice> line1 = new List<Dice>();
             List<Dice> line2 = new List<Dice>();

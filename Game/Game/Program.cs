@@ -117,7 +117,8 @@ namespace Game
                         //GameRules.UpgradeDice(dice);
                         //GameRules.RecruitDice();
 
-                        StopSounds();
+                        //StopSounds();
+                        GameRules.OpenShop();
                     }
                 }
 
