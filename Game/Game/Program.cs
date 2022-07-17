@@ -475,8 +475,11 @@ namespace Game
                     if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                     {
                         description.ImageIndex = 6;
-                        GameRules.RecruitmentTier++;
-                        GameRules.SpendCoins(15);
+                        if (GameRules.RecruitmentTier < 2)
+                        {
+                            GameRules.RecruitmentTier++;
+                            GameRules.SpendCoins(15);
+                        }
                     }
                 }
             };

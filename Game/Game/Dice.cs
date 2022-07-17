@@ -380,6 +380,15 @@ namespace Game
         private int timeSinceLastDirectionChange = DirectionChangeTime;
         public override void Tick(GameState state)
         {
+            if (!this.canLock)
+            {
+                this.descriptionSymbol.ImageIndex = 4;
+            }
+            else if (this.descriptionSymbol.ImageIndex == 4)
+            {
+                this.descriptionSymbol.ImageIndex = 0;
+            }
+
             // Pickup
             if (!GameRules.IsBattling && !IsRolling && state.Controllers[0][Keys.CLICK].IsPress())
             {
