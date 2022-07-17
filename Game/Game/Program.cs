@@ -265,7 +265,7 @@ namespace Game
             {
                 if (timer <= 0)
                 {
-                    UI.PlayResource("Sounds.chatter.wav");
+                    UI.PlayResource("Sounds.chatter2.wav");
                     timer = Program.FPS * 7;
                 }
 
@@ -278,7 +278,7 @@ namespace Game
                         {
                             if (!Mute)
                             {
-                                UI.PlayResource("Sounds.chatter.wav");
+                                UI.PlayResource("Sounds.chatter2.wav");
                                 timer = Program.FPS * 7;
                             }
                         }

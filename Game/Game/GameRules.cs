@@ -42,6 +42,7 @@ namespace Game
 
         //Battle
         private static Entity battleEnemyEntity;
+        private static Entity battleEnemyImageEntity;
         private static TextDescription battleEnemyDescription;
 
         private static Entity battleCursorEntity;
@@ -99,6 +100,8 @@ namespace Game
             Program.BattleLocation.AddEntity(battleEnemyEntity = new Entity(battleEnemyDescription = new TextDescription("----------", 0, 0)));
             Program.BattleLocation.AddEntity(battleCursorEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], 0, 0)));
             ((Description2D)battleCursorEntity.Description).ImageIndex = 10;
+
+            Program.BattleLocation.AddEntity(battleEnemyImageEntity = new Entity(new Description2D(Sprite.Sprites["dice"], 0, 0)));
 
 
             battleEndEntity = new Entity(new TextDescription("End Battle", Program.Width / 2 - 64, Program.Height - 24));
@@ -397,7 +400,9 @@ namespace Game
             battleDice = diceToBattle;
             string info = $"{health}♥ {attack}⸸";
             battleEnemyDescription.ChangeText(info);
-            battleEnemyDescription.SetCoords(Program.Width / 2 - info.Length * 14, 30);
+            battleEnemyDescription.SetCoords(Program.Width / 2 - 22, 30);
+            (battleEnemyImageEntity.Description as Description2D).SetCoords(Program.Width / 2, 64);
+            (battleEnemyImageEntity.Description as Description2D).ImageIndex = 18 + Program.Scorecard.Level + (Program.Scorecard.CurrentQuestIndex < Program.Scorecard.QuestCount / 2 ? 0 : 1);
 
             List<Dice> line1 = new List<Dice>();
             List<Dice> line2 = new List<Dice>();
@@ -617,7 +622,7 @@ namespace Game
             if (actionTimer % 3 == 2)
             {
                 numRoll++;
-                if (turn % (battleDice.Count + 1) < battleDice.Count)
+                if (turn % (battleDice.Count + 1) < battleDice.Count && turn >= 0)
                 {
                     Dice dice = battleDice[turn % (battleDice.Count + 1)];
                     if (dice.NumRolls == numRoll)

@@ -14,29 +14,32 @@ namespace Game
     internal class Scorecard : Entity
     {
         private Sheet[] sheets;
-        int level;
+        public int Level { get; private set; }
+
+        public int CurrentQuestIndex { get; set; }
+        public int QuestCount => sheets[Level].QuestCount;
 
         public Scorecard(int x, int y) : base(new Description2D(Sprite.Sprites["Scorecard"], x, y))
         {
             sheets = GenerateRun();
-            level = 0;
+            Level = 0;
         }
 
         public void LoadSheet(Location location)
         {
-            sheets[level].Display(location);
+            sheets[Level].Display(location);
         }
 
         public void AdvanceLevel(Location location)
         {
-            sheets[level].Hide(location);
-            level++;
+            sheets[Level].Hide(location);
+            Level++;
             LoadSheet(location);
         }
 
         public bool IsComplete()
         {
-            return sheets[level].IsComplete();
+            return sheets[Level].IsComplete();
         }
 
         private Sheet[] GenerateRun()
@@ -50,7 +53,10 @@ namespace Game
     {
         private Quest[] quests;
         private SideQuest[] sideQuests;
-           
+
+        public int QuestCount => quests.Length;
+
+
         public Sheet(int level, int x , int y)
         {
             int xoffset = 36;
@@ -61,12 +67,12 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
@@ -83,12 +89,12 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("8♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("3♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("5♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("8♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("8♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("3♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("5♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    new Quest("8♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
@@ -108,12 +114,12 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("5♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("12♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("15♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("20♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("5♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("12♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("15♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    new Quest("20♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
@@ -133,11 +139,11 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("20♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("25♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("28♥ 8⸸", x + xoffset, y + yoffset + yy++ * 20),
-                    new Quest("50♥ 10⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("20♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("25♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("28♥ 8⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("50♥ 10⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
                 };
 
                 yoffset += yy * 20;
@@ -194,10 +200,12 @@ namespace Game
 
         private Entity checkBoxEntity;
         private Entity textEntity;
+        private int questIndex;
 
-        public Quest(string name, int x, int y)
+        public Quest(string name, int x, int y, int questIndex)
         {
             Text = name;
+            this.questIndex = questIndex;
 
             textEntity = new Entity(new TextDescription(Text, x, y));
             checkBoxEntity = new Entity(new Description2D(Sprite.Sprites["Symbols"], x - 16, y + 12));
@@ -258,6 +266,7 @@ namespace Game
                 {
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 6;
 
+                    Program.Scorecard.CurrentQuestIndex = this.questIndex;
                     Program.StopSounds();
                     GoOnQuest();
                 }
@@ -289,7 +298,7 @@ namespace Game
     {
         private string name;
 
-        public SideQuest(string name, int x, int y) : base(name, x, y)
+        public SideQuest(string name, int x, int y) : base(name, x, y, 0)
         {
             this.name = name;
         }

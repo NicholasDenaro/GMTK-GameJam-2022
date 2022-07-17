@@ -210,7 +210,7 @@ namespace Game
             Program.BattleLocation.AddEntity(this.symbolEntity);
             this.diceInfoEntity.Hide();
 
-            this.description.SetCoords(Program.Width / 2 - count * 48 / 2 + index * 48, Program.Height - 48 - row * 48);
+            this.description.SetCoords(Program.Width / 2 - count * 48 / 2 + index * 48 + 24, Program.Height - 48 - row * 48);
             this.ResetPositions();
 
             this.descriptionSymbol.ImageIndex = 0;
