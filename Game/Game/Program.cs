@@ -361,6 +361,7 @@ namespace Game
 
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
+            MenuLocation.AddEntity(new Entity(new TextDescription("By Nicholas (nDev) Denaro\n                 for the", Program.Width / 2 - "By Nicholas (nDev) Denaro".Length * 18 / 4, Program.Height / 2 + 6)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
             MenuLocation.AddEntity(new Entity(new TextDescription("Click to continue", Program.Width / 2 - "Click to continue".Length * 18 / 4 + 6, Program.Height  - 32)));
             MenuLocation.AddEntity(MuteEntity);
