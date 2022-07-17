@@ -28,6 +28,7 @@ namespace Game
         public static GameEngine.GameEngine Engine;
         public static GameUI UI;
         public static NAudioSoundPlayer SoundPlayer;
+        public static NAudio.Wave.WaveOutEvent _soundPlayer;
         public const int GameStateIndex = 0;
         public const int Width = 480;
         public const int Height = 320;
@@ -101,6 +102,8 @@ namespace Game
                 State = s;
                 Engine.TickEnd(0) -= act;
             };
+
+            _soundPlayer = typeof(NAudioSoundPlayer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "player").GetValue(SoundPlayer) as NAudio.Wave.WaveOutEvent;
 
             Engine.TickEnd(0) += act;
 
@@ -254,11 +257,55 @@ namespace Game
             }
         }
 
+        private static int timer = 0;
+        private static bool addedRepeatForChatter;
+        public static void PlayChatterSound()
+        {
+            if (!Mute)
+            {
+                if (timer <= 0)
+                {
+                    UI.PlayResource("Sounds.chatter.wav");
+                    timer = Program.FPS * 7;
+                }
+
+                if (!addedRepeatForChatter)
+                {
+                    Engine.TickEnd(0) += (object sender, GameState state) =>
+                    {
+                        timer--;
+                        if (timer <= 0 && state.Location == GameLocation)
+                        {
+                            if (!Mute)
+                            {
+                                UI.PlayResource("Sounds.chatter.wav");
+                                timer = Program.FPS * 7;
+                            }
+                        }
+                    };
+                    addedRepeatForChatter = true;
+                }
+            }
+        }
+
         public static void StopSounds()
         {
             // TODO: Expose a way to stop sound through the game's sound player abstraction
-            var s = typeof(NAudioSoundPlayer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "player").GetValue(SoundPlayer) as NAudio.Wave.WaveOutEvent;
-            s.Stop();
+            // Info: The sound buffer isn't being cleared, and is being re-used when another sound starts up again
+            _soundPlayer.Stop();
+            //NAudio.Wave.WaveOutBuffer[] buffers = typeof(NAudio.Wave.WaveOutEvent).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "buffers").GetValue(_soundPlayer) as NAudio.Wave.WaveOutBuffer[];
+            
+            // This doesn't seem to work
+            //for (int i = 0; i < buffers.Length; i++)
+            //{
+            //    byte[] buffer = typeof(NAudio.Wave.WaveOutBuffer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "buffer").GetValue(buffers[i]) as byte[];
+            //    for (int j = 0; j < buffer.Length; j++)
+            //    {
+            //        buffer[j] = 0;
+            //    }
+
+            //    typeof(NAudio.Wave.WaveOutBuffer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "buffer").SetValue(buffers[i], buffer);
+            //}
         }
 
         private static void MainMenuSetup()
@@ -427,6 +474,8 @@ namespace Game
             DiceBag.AddDice(Dice.Create(DicePresetsT1["Healer"], 0, 0));
 
             GameLocation.AddEntity(DiceBag);
+
+            PlayChatterSound();
         }
 
         public static Dictionary<int, object> mouseMap = new Dictionary<int, object>()

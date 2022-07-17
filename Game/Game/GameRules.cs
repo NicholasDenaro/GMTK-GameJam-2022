@@ -162,6 +162,8 @@ namespace Game
             Program.Engine.SetLocation(Program.GameStateIndex, Program.GameLocation);
 
             Reset();
+
+            Program.PlayChatterSound();
         }
 
         public static void OpenShop()
@@ -367,6 +369,30 @@ namespace Game
             actionTimer = 0;
             battleShield = 0;
             numRoll = 0;
+
+            TickHandler th = (o, s) => { };
+
+            int removeTh = 0;
+            th = (o, state) =>
+            {
+                // TODO: I don't know why the battle needs this to make the chatter stop
+                //if (removeTh == 0)
+                //{
+                //    Program.StopSounds();
+                //}
+
+                if (removeTh++ >= 2)
+                {
+                    // OHHHHHH the sound buffer isn't being cleared, so when you play a new sound, the old sound is still in the buffer
+                    Program.PlayQuickRollingDice();
+                    Program.Engine.TickEnd(0) -= th;
+                }
+                // this also cancels the dice sound, so add it back in I guess
+                // playing a sound on the same frame that you stop breaks it!
+                //Program.PlayQuickRollingDice();
+            };
+
+            Program.Engine.TickEnd(0) += th;
 
             battleDice = diceToBattle;
             string info = $"{health}♥ {attack}⸸";

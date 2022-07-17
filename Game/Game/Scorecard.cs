@@ -240,6 +240,7 @@ namespace Game
                 dice.Despawn();
             }
 
+
             Program.Engine.SetLocation(Program.GameStateIndex, Program.BattleLocation);
             Regex r = new Regex("(?<health>[0-9]+).*(?<attack>[0-9]+)");
             var match = r.Match(Text);
@@ -256,6 +257,8 @@ namespace Game
                 if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                 {
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 6;
+
+                    Program.StopSounds();
                     GoOnQuest();
                 }
             }
