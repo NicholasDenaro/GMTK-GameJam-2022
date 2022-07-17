@@ -35,8 +35,10 @@
     <None Remove="Sprites\dice.png" />
     <None Remove="Sprites\dicebag.png" />
     <None Remove="Sprites\diceFaces.png" />
+    <None Remove="Sprites\Jam Logo 2022.png" />
     <None Remove="Sprites\scorecard.png" />
     <None Remove="Sprites\symbols.png" />
+    <None Remove="Sprites\Title.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,8 +68,10 @@
     <EmbeddedResource Include="Sprites\dice.png" />
     <EmbeddedResource Include="Sprites\dicebag.png" />
     <EmbeddedResource Include="Sprites\diceFaces.png" />
+    <EmbeddedResource Include="Sprites\Jam Logo 2022.png" />
     <EmbeddedResource Include="Sprites\scorecard.png" />
     <EmbeddedResource Include="Sprites\symbols.png" />
+    <EmbeddedResource Include="Sprites\Title.png" />
   </ItemGroup>
 
   <ItemGroup>

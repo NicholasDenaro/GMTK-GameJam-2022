@@ -17,19 +17,23 @@ namespace Game
         public const int FPS = 60;
 #if DEBUG
         public const bool DEBUG = true;
+        public const int SOUNDCHANNEL = 7;
 #elif RELEASE
         public const bool DEBUG = false;
+        public const int SOUNDCHANNEL = 0;
 #endif
 
         public static readonly Random Random = new Random();
 
         public static GameEngine.GameEngine Engine;
         public static GameUI UI;
+        public static NAudioSoundPlayer SoundPlayer;
         public const int GameStateIndex = 0;
         public const int Width = 480;
         public const int Height = 320;
 
         public static bool Mute { get; set; } = false;
+        public static Entity MuteEntity { get; private set; }
 
         public static GameState State { get; private set; }
 
@@ -61,7 +65,7 @@ namespace Game
                 .Controller(new WindowsMouseController(mouseMap))
                 .Controller(new WindowsKeyController(keyMap))
                 .StartingLocation(MenuLocation = new Location(new Description2D(0, 0, Width, Height)))
-                .SoundPlayer(new NAudioSoundPlayer(7))
+                .SoundPlayer(SoundPlayer = new NAudioSoundPlayer(SOUNDCHANNEL))
                 .Build();
 ;
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
@@ -78,6 +82,15 @@ namespace Game
             new Sprite("Symbols", "Sprites.symbols.png", 16, 16, 8, 8);
             new Sprite("Button", "Sprites.button.png", 80, 32, 0, 0);
             new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0);
+            new Sprite("JamLogo", "Sprites.Jam Logo 2022.png", 1920, 1053, 0, 0);
+            new Sprite("Title", "Sprites.Title.png", 128, 80, 64, 0);
+
+
+            Description2D d2d;
+            MuteEntity = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], Program.Width - 9, 8));
+            d2d.ImageIndex = 9;
+            d2d.ZIndex = 1000;
+
 
             MainMenuSetup();
 
@@ -91,15 +104,36 @@ namespace Game
 
             Engine.TickEnd(0) += act;
 
-            Engine.TickEnd(0) += (object o, GameState s) =>
+            Engine.TickEnd(0) += (object o, GameState state) =>
             {
                 if (DEBUG)
                 {
-                    if (s.Controllers[1][Keys.DEBUG].IsPress())
+                    if (state.Controllers[1][Keys.DEBUG].IsPress())
                     {
                         List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
                         //GameRules.UpgradeDice(dice);
-                        GameRules.RecruitDice();
+                        //GameRules.RecruitDice();
+
+
+                        StopSounds();
+                    }
+                }
+
+                if (state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (d2d.IsCollision(new Description2D(info.X + d2d.Sprite.X, info.Y + d2d.Sprite.Y, 1, 1)))
+                    {
+                        if (Mute)
+                        {
+                            d2d.ImageIndex += 1;
+                            Mute = false;
+                        }
+                        else
+                        {
+                            d2d.ImageIndex -= 1;
+                            Mute = true;
+                        }
                     }
                 }
             };
@@ -220,9 +254,20 @@ namespace Game
             }
         }
 
+        public static void StopSounds()
+        {
+            // TODO: Expose a way to stop sound through the game's sound player abstraction
+            var s = typeof(NAudioSoundPlayer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "player").GetValue(SoundPlayer) as NAudio.Wave.WaveOutEvent;
+            s.Stop();
+        }
+
         private static void MainMenuSetup()
         {
-            MenuLocation.AddEntity(new Entity(new TextDescription("      Welcome to\n Dicey Guildkeeper", Program.Width / 2 - ("Dicey Guildkeeper".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
+            MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+            MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
+            MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
+            MenuLocation.AddEntity(new Entity(new TextDescription("Click to continue", Program.Width / 2 - "Click to continue".Length * 18 / 4 + 6, Program.Height  - 32)));
+            MenuLocation.AddEntity(MuteEntity);
             Engine.TickEnd(0) += (object sender, GameState state) =>
             {
                 if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
@@ -233,12 +278,14 @@ namespace Game
             };
 
             //Game Over
+            GameOverLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             GameOverLocation.AddEntity(new Entity(new TextDescription("Game Over", Program.Width / 2 - ("Game Over".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
 
             // Shop
             Entity ent;
             Description2D d2d;
             ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+            ShopLocation.AddEntity(MuteEntity);
 
             ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Scorecard"], 16, 16, 320, 144)));
 
@@ -331,15 +378,24 @@ namespace Game
             ShopLocation.AddEntity(new Button(Program.ShopLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseShop));
 
             // Recruitment
+            RecruitLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             RecruitLocation.AddEntity(new Button(Program.RecruitLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseRecruitment));
+            RecruitLocation.AddEntity(MuteEntity);
 
             // Upgrade
+            UpgradeLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             UpgradeLocation.AddEntity(new Button(Program.UpgradeLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseUpgrades));
+            UpgradeLocation.AddEntity(MuteEntity);
+
+
+            BattleLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+            BattleLocation.AddEntity(MuteEntity);
         }
 
         private static void GameSetup()
         {
             GameLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+            GameLocation.AddEntity(MuteEntity);
 
             int x = Program.Width / 2 - 48 + 16;
             int xEnd = Program.Width - 16;
@@ -351,7 +407,7 @@ namespace Game
 
             Scorecard.LoadSheet(GameLocation);
 
-            GameLocation.AddEntity(new Button(Program.GameLocation, "Roll", Program.Width / 2 + 32, Program.Height - 96, GameRules.Roll));
+            GameLocation.AddEntity(new Button(Program.GameLocation, "Roll", Program.Width / 2 - 24, Program.Height - 96, GameRules.Roll));
 
             GameRules.Init();
 

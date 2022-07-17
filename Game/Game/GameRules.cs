@@ -184,9 +184,9 @@ namespace Game
         public static void CloseUpgrades()
         {
             Reset();
-            foreach (Entity entity in Program.UpgradeLocation.Entities.Where(ent => ent is not Button))
+            foreach (Entity entity in Program.UpgradeLocation.Entities.Where(ent => ent is not Button && !(ent.Description is Description2D && (ent.Description as Description2D).Sprite?.Name == "desk")))
             {
-                Program.UpgradeLocation.RemoveEntity(entity.Id);
+                    Program.UpgradeLocation.RemoveEntity(entity.Id);
             }
 
             // TODO: Big Hack
@@ -197,7 +197,7 @@ namespace Game
         public static void CloseRecruitment()
         {
             Reset();
-            foreach (Entity entity in Program.RecruitLocation.Entities.Where(ent => ent is not Button))
+            foreach (Entity entity in Program.RecruitLocation.Entities.Where(ent => ent is not Button && !(ent.Description is Description2D && (ent.Description as Description2D).Sprite?.Name == "desk")))
             {
                 Program.RecruitLocation.RemoveEntity(entity.Id);
             }
@@ -264,6 +264,11 @@ namespace Game
                 d2d.ImageIndex = 5;
                 ent.TickAction += (state, entity) =>
                 {
+                    if (state.Controllers.Count == 0)
+                    {
+                        return;
+                    }
+
                     Description2D description = entity.Description as Description2D;
                     if (GameRules.Coins >= cost && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
                     {
@@ -350,6 +355,7 @@ namespace Game
         private static int battleShield;
         private static List<Dice> battleDice;
         private static int turn;
+        private static int numRoll;
         public static void InitBattle(List<Dice> diceToBattle, int health, int attack)
         {
             IsBattling = true;
@@ -360,6 +366,7 @@ namespace Game
             timer = 0;
             actionTimer = 0;
             battleShield = 0;
+            numRoll = 0;
 
             battleDice = diceToBattle;
             string info = $"{health}♥ {attack}⸸";
@@ -583,7 +590,21 @@ namespace Game
 
             if (actionTimer % 3 == 2)
             {
-                turn++;
+                numRoll++;
+                if (turn % (battleDice.Count + 1) < battleDice.Count)
+                {
+                    Dice dice = battleDice[turn % (battleDice.Count + 1)];
+                    if (dice.NumRolls == numRoll)
+                    {
+                        turn++;
+                        numRoll = 0;
+                    }
+                }
+                else // Enemy only gets 1 turn
+                {
+                    turn++;
+                    numRoll = 0;
+                }
                 return battleEnemyHealth <= 0 || battleDice.Count == 0;
             }
 

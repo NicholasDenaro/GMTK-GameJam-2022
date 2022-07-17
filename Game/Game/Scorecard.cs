@@ -79,7 +79,7 @@ namespace Game
                     new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
                 };
             }
-            else
+            else if (level == 1)
             {
                 quests = new Quest[]
                 {
@@ -89,6 +89,55 @@ namespace Game
                     new Quest("3♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20),
                     new Quest("5♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
                     new Quest("8♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                };
+
+                yoffset += yy * 20;
+                yy = 0;
+                sideQuests = new SideQuest[]
+                {
+                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                };
+            }
+            else if (level == 2)
+            {
+                quests = new Quest[]
+                {
+                    new Quest("5♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("12♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("15♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("20♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20),
+                };
+
+                yoffset += yy * 20;
+                yy = 0;
+                sideQuests = new SideQuest[]
+                {
+                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                };
+            }
+            else if (level == 3)
+            {
+                quests = new Quest[]
+                {
+                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("20♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("25♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("28♥ 8⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("50♥ 10⸸", x + xoffset, y + yoffset + yy++ * 20),
                 };
 
                 yoffset += yy * 20;

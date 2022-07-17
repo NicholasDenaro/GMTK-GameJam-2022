@@ -19,6 +19,7 @@ namespace Game
 
         public Button(Location location, string text, int x, int y, Action action) : base(new Description2D(Sprite.Sprites["Button"], x, y))
         {
+            (this.Description as Description2D).ZIndex = 1;
             Description2D d2d;
             textEntity = new Entity(d2d = new TextDescription(text, x + 10, y + 2));
             d2d.ZIndex = 2;
