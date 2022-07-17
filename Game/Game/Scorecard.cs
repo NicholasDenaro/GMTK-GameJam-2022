@@ -174,7 +174,7 @@ namespace Game
             switch(name)
             {
                 case "Shop":
-                    GotoTheShop();
+                    GoToTheShop();
                     break;
                 case "Rest":
                     TakeARest();
@@ -188,7 +188,7 @@ namespace Game
             }
         }
 
-        private void GotoTheShop()
+        private void GoToTheShop()
         {
             GameRules.OpenShop();
         }

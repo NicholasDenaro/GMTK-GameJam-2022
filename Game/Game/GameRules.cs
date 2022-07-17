@@ -11,15 +11,15 @@ namespace Game
 {
     internal class GameRules
     {
-        public static int DiceSlots { get; private set; }
+        public static int DiceSlots { get; set; }
         public static int CurrentDiceInPlay { get; private set; }
 
-        public static int MaxRolls { get; private set; }
+        public static int MaxRolls { get; set; }
         public static int RollsLeft { get; private set; }
 
         public static int Lives { get; private set; }
 
-        public static int Coins { get; private set; } = 5;
+        public static int Coins { get; set; } = 5;
 
         public static bool IsBattling { get; private set; }
         public static bool IsBattlingFinished { get; private set; }
@@ -139,6 +139,11 @@ namespace Game
                     livesDescription.ChangeCoordsDelta(20, 0);
                 }
             }
+            else
+            {
+                Coins += 5;
+                (coinsEntity.Description as TextDescription).ChangeText($"{Coins:000}");
+            }
 
             Program.BattleLocation.RemoveEntity(battleEndEntity.Id);
             Program.BattleLocation.RemoveEntity(battleEndButtonEntity.Id);
@@ -155,7 +160,19 @@ namespace Game
         public static void OpenShop()
         {
             Program.Engine.SetLocation(Program.GameState, Program.ShopLocation);
+
+            foreach (Dice dice in GetDiceInPlay())
+            {
+                dice.Despawn();
+            }
         }
+
+        public static void CloseShop()
+        {
+            Reset();
+            Program.Engine.SetLocation(Program.GameState, Program.GameLocation);
+        }
+
         public static void HealDice(List<Dice> diceList)
         {
             foreach (Dice dice in diceList)
@@ -168,6 +185,8 @@ namespace Game
         public static void UpgradeDice(List<Dice> diceList)
         {
             Program.Engine.SetLocation(Program.GameState, Program.UpgradeLocation);
+
+
         }
         public static void RecruitDice(List<Dice> diceList)
         {

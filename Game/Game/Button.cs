@@ -17,12 +17,12 @@ namespace Game
         private Action action;
         public bool Enabled { get; set; } = true;
 
-        public Button(string text, int x, int y, Action action) : base(new Description2D(Sprite.Sprites["Button"], x, y))
+        public Button(Location location, string text, int x, int y, Action action) : base(new Description2D(Sprite.Sprites["Button"], x, y))
         {
             Description2D d2d;
             textEntity = new Entity(d2d = new TextDescription(text, x + 10, y + 2));
             d2d.ZIndex = 2;
-            Program.GameLocation.AddEntity(textEntity);
+            location.AddEntity(textEntity);
             this.action = action;
         }
 
@@ -35,7 +35,7 @@ namespace Game
                 if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                 {
                     this.held = true;
-                    description.ImageIndex = 0;
+                    description.ImageIndex = 1;
                 }
             }
             else if (this.held && !state.Controllers[0][Program.Keys.CLICK].IsDown())
@@ -47,7 +47,7 @@ namespace Game
                     this.action();
                 }
 
-                description.ImageIndex = 1;
+                description.ImageIndex = 0;
                 this.held = false;
             }
         }

@@ -53,6 +53,9 @@ namespace Game
             GameLocation = new Location(new Description2D(0, 0, Width, Height));
             GameOverLocation = new Location(new Description2D(0, 0, Width, Height));
             BattleLocation = new Location(new Description2D(0, 0, Width, Height));
+            ShopLocation = new Location(new Description2D(0, 0, Width, Height));
+            UpgradeLocation = new Location(new Description2D(0, 0, Width, Height));
+            RecruitLocation = new Location(new Description2D(0, 0, Width, Height));
 
             new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
@@ -60,6 +63,7 @@ namespace Game
             new Sprite("Scorecard", "Sprites.scorecard.png", 193, 300);
             new Sprite("Symbols", "Sprites.symbols.png", 16, 16, 8, 8);
             new Sprite("Button", "Sprites.button.png", 80, 32, 0, 0);
+            new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0);
 
             MainMenuSetup();
 
@@ -82,11 +86,99 @@ namespace Game
 
             //Game Over
             GameOverLocation.AddEntity(new Entity(new TextDescription("Game Over", Program.Width / 2 - ("Game Over".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
+
+            // Shop
+            Entity ent;
+            Description2D d2d;
+            ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+
+            ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Scorecard"], 16, 16, 320, 144)));
+
+            int xOffset = 48;
+            int yOffset = 36;
+            int yMult = 28;
+
+            ShopLocation.AddEntity(new Entity(new TextDescription("+1 dice slot ................... 05", xOffset + 24, yOffset + yMult * 0)));
+            ShopLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 256, yOffset + 12 + yMult * 0)));
+            d2d.ImageIndex = 7;
+            ShopLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 272, yOffset + 12 + yMult * 0)));
+            d2d.ImageIndex = 5;
+            ent.TickAction += (state, entity) =>
+            {
+                Description2D description = entity.Description as Description2D;
+                if (GameRules.Coins >= 5 && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                    {
+                        description.ImageIndex = 6;
+                        GameRules.DiceSlots += 1;
+                        GameRules.Coins -= 5;
+                    }
+                }
+            };
+
+            ShopLocation.AddEntity(new Entity(new TextDescription("+1 max rolls .................. 10", xOffset + 24, yOffset + yMult * 1)));
+            ShopLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 256, yOffset + 12 + yMult * 1)));
+            d2d.ImageIndex = 7;
+            ShopLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 272, yOffset + 12 + yMult * 1)));
+            d2d.ImageIndex = 5;
+            ent.TickAction += (state, entity) =>
+            {
+                Description2D description = entity.Description as Description2D;
+                if (GameRules.Coins >= 10 && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                    {
+                        description.ImageIndex = 6;
+                        GameRules.MaxRolls += 1;
+                        GameRules.Coins -= 10;
+                    }
+                }
+            };
+
+            ShopLocation.AddEntity(new Entity(new TextDescription("+1 recruitment slot ...... 10", xOffset + 24, yOffset + yMult * 2)));
+            ShopLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 256, yOffset + 12 + yMult * 2)));
+            d2d.ImageIndex = 7;
+            ShopLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 272, yOffset + 12 + yMult * 2)));
+            d2d.ImageIndex = 5;
+            ent.TickAction += (state, entity) =>
+            {
+                Description2D description = entity.Description as Description2D;
+                if (GameRules.Coins >= 10 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                    {
+                    }
+                }
+            };
+
+            ShopLocation.AddEntity(new Entity(new TextDescription("+1 recruitment tier ...... 15", xOffset + 24, yOffset + yMult * 3)));
+            ShopLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 256, yOffset + 12 + yMult * 3)));
+            d2d.ImageIndex = 7;
+            ShopLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 272, yOffset + 12 + yMult * 3)));
+            d2d.ImageIndex = 5;
+            ent.TickAction += (state, entity) =>
+            {
+                Description2D description = entity.Description as Description2D;
+                if (GameRules.Coins >= 15 && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                {
+                    MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                    if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                    {
+                        description.ImageIndex = 6;
+                    }
+                }
+            };
+
+            ShopLocation.AddEntity(new Button(Program.ShopLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
         }
 
         private static void GameSetup()
         {
-            GameLocation.AddEntity(new Entity(new Description2D(new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0), 0, 0)));
+            GameLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
 
             int x = Program.Width / 2 - 48 + 16;
             int xEnd = Program.Width - 16;
@@ -99,7 +191,7 @@ namespace Game
 
             scorecard.LoadSheet(GameLocation);
 
-            GameLocation.AddEntity(new Button("Roll", Program.Width / 2 + 32, Program.Height - 96, GameRules.Roll));
+            GameLocation.AddEntity(new Button(Program.GameLocation, "Roll", Program.Width / 2 + 32, Program.Height - 96, GameRules.Roll));
 
             GameRules.Init();
 

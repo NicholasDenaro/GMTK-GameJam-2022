@@ -6,3 +6,6 @@
 /Game/Game/bin/Debug/net6.0
 /.vs
 /Game/.vs
+/Game/Game/bin/Release/net6.0
+/Game/Game/Properties/PublishProfiles/FolderProfile.pubxml.user
+*.user
