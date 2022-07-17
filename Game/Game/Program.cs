@@ -15,16 +15,23 @@ namespace Game
     internal class Program
     {
         public const int FPS = 60;
+#if DEBUG
+        public const bool DEBUG = true;
+#elif RELEASE
+        public const bool DEBUG = false;
+#endif
 
         public static readonly Random Random = new Random();
 
         public static GameEngine.GameEngine Engine;
         public static GameUI UI;
-        public const int GameState = 0;
+        public const int GameStateIndex = 0;
         public const int Width = 480;
         public const int Height = 320;
 
         public static bool Mute { get; set; } = false;
+
+        public static GameState State { get; private set; }
 
         public static Location GameLocation { get; private set; }
         public static Location MenuLocation { get; private set; }
@@ -33,6 +40,8 @@ namespace Game
         public  static Location BattleLocation { get; private set; }
         public static Location UpgradeLocation { get; private set; }
         public static Location RecruitLocation { get; private set; }
+
+        public static Scorecard Scorecard { get; private set; }
 
         public static Description2D PlayArea { get; private set; }
 
@@ -72,7 +81,28 @@ namespace Game
 
             MainMenuSetup();
 
-            Engine.SetLocation(GameState, MenuLocation);
+            Engine.SetLocation(GameStateIndex, MenuLocation);
+
+            TickHandler act = (o, s) => { };
+            act = (o, s) => {
+                State = s;
+                Engine.TickEnd(0) -= act;
+            };
+
+            Engine.TickEnd(0) += act;
+
+            Engine.TickEnd(0) += (object o, GameState s) =>
+            {
+                if (DEBUG)
+                {
+                    if (s.Controllers[1][Keys.DEBUG].IsPress())
+                    {
+                        List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
+                        //GameRules.UpgradeDice(dice);
+                        GameRules.RecruitDice();
+                    }
+                }
+            };
 
             await Engine.Start();
         }
@@ -84,6 +114,13 @@ namespace Game
             "Sounds.mediumdice2.wav",
             "Sounds.mediumdice3.wav",
             "Sounds.mediumdice4.wav",
+            "Sounds.shortdice.wav",
+            "Sounds.shortdice2.wav",
+            "Sounds.shortdice3.wav",
+        };
+
+        static List<string> rollingQuickSounds = new List<string>()
+        {
             "Sounds.shortdice.wav",
             "Sounds.shortdice2.wav",
             "Sounds.shortdice3.wav",
@@ -108,7 +145,7 @@ namespace Game
         {
             if (!Mute)
             {
-                UI.PlayResource("Sounds.shortdice2.wav");
+                UI.PlayResource(rollingQuickSounds[Program.Random.Next(rollingQuickSounds.Count)]);
             }
         }
 
@@ -190,7 +227,7 @@ namespace Game
             {
                 if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
                 {
-                    Engine.SetLocation(Program.GameState, GameLocation);
+                    Engine.SetLocation(Program.GameStateIndex, GameLocation);
                     GameSetup();
                 }
             };
@@ -224,7 +261,7 @@ namespace Game
                     {
                         description.ImageIndex = 6;
                         GameRules.DiceSlots += 1;
-                        GameRules.Coins -= 5;
+                        GameRules.SpendCoins(5);
                     }
                 }
             };
@@ -244,7 +281,7 @@ namespace Game
                     {
                         description.ImageIndex = 6;
                         GameRules.MaxRolls += 1;
-                        GameRules.Coins -= 10;
+                        GameRules.SpendCoins(10);
                     }
                 }
             };
@@ -264,7 +301,7 @@ namespace Game
                     {
                         description.ImageIndex = 6;
                         GameRules.RecruitmentSlots++;
-                        GameRules.Coins -= 10;
+                        GameRules.SpendCoins(10);
                     }
                 }
             };
@@ -284,18 +321,20 @@ namespace Game
                     {
                         description.ImageIndex = 6;
                         GameRules.RecruitmentTier++;
-                        GameRules.Coins -= 15;
+                        GameRules.SpendCoins(15);
                     }
                 }
             };
 
-            ShopLocation.AddEntity(new Button(Program.ShopLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
+            //int yPos = Program.Height - 32 - 16;
+            int yPos = 16;
+            ShopLocation.AddEntity(new Button(Program.ShopLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseShop));
 
             // Recruitment
-            RecruitLocation.AddEntity(new Button(Program.RecruitLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
+            RecruitLocation.AddEntity(new Button(Program.RecruitLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseRecruitment));
 
             // Upgrade
-            UpgradeLocation.AddEntity(new Button(Program.UpgradeLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
+            UpgradeLocation.AddEntity(new Button(Program.UpgradeLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseUpgrades));
         }
 
         private static void GameSetup()
@@ -308,10 +347,9 @@ namespace Game
             int yEnd = Program.Height - 96 - 16;
             GameLocation.AddEntity(new Entity(PlayArea = new Description2D(new Sprite("desk2", "Sprites.desk2.png", 240, 160, 0, 0), x, y, xEnd - x, yEnd - y)));
 
-            Scorecard scorecard;
-            GameLocation.AddEntity(scorecard = new Scorecard(10, 10));
+            GameLocation.AddEntity(Scorecard = new Scorecard(10, 10));
 
-            scorecard.LoadSheet(GameLocation);
+            Scorecard.LoadSheet(GameLocation);
 
             GameLocation.AddEntity(new Button(Program.GameLocation, "Roll", Program.Width / 2 + 32, Program.Height - 96, GameRules.Roll));
 
@@ -345,6 +383,7 @@ namespace Game
         public static Dictionary<int, object> keyMap = new Dictionary<int, object>()
         {
             { (int)Avalonia.Input.Key.R, Keys.ROLL },
+            { (int)Avalonia.Input.Key.OemCloseBrackets, Keys.DEBUG },
         };
 
         public enum Sides { FOUR = 4, SIX = 6, EIGHT = 8, TEN = 10, TWELVE = 12, TWENTY = 20 }
@@ -353,7 +392,7 @@ namespace Game
 
         public enum Faces { NONE = 0, SWORD = 1, SHIELD = 2, HEAL = 3, BOW = 4}
 
-        public enum Keys { CLICK, RCLICK, ROLL, MOUSEINFO }
+        public enum Keys { CLICK, RCLICK, ROLL, MOUSEINFO, DEBUG }
 
         public static Dictionary<int, int> SidesToUpgradeIndex { get; private set; } = new Dictionary<int, int>()
         {

@@ -84,6 +84,48 @@ namespace Game
             this.diceInfoEntity = new DiceInfoEntity(this, x, y);
         }
 
+
+        public (Sides sides, Colors color, Faces[] faces, int health, int numRolls) GetUpgradeInfo()
+        {
+            int upgradeIndex = Program.SidesToUpgradeIndex[this.Sides];
+            (Sides sides, Colors color, Faces[] faces, int health, int numRolls) info;
+
+            List<string> upgradeTree;
+
+            if (this.description.ImageIndex / 6 == 0)
+            {
+                upgradeTree = Program.WarriorUpgrades;
+            }
+            else if (this.description.ImageIndex / 6 == 1)
+            {
+                upgradeTree = Program.HealerUpgrades;
+            }
+            else if (this.description.ImageIndex / 6 == 2)
+            {
+                upgradeTree = Program.ArcherUpgrades;
+            }
+            else
+            {
+                // TODO yellow?
+                upgradeTree = Program.WarriorUpgrades;
+            }
+
+            if (upgradeIndex < 1)
+            {
+                info = Program.DicePresetsT1[upgradeTree[upgradeIndex + 1]];
+            }
+            else if (upgradeIndex < 3)
+            {
+                info = Program.DicePresetsT2[upgradeTree[upgradeIndex + 1]];
+            }
+            else
+            {
+                info = Program.DicePresetsT3[upgradeTree[upgradeIndex + 1]];
+            }
+
+            return info;
+        }
+
         public void Upgrade()
         {
             int upgradeIndex = Program.SidesToUpgradeIndex[this.Sides];
@@ -150,12 +192,12 @@ namespace Game
         {
             this.description.SetCoords(x, y);
             this.ResetPositions();
-            Program.Engine.AddEntity(Program.GameState, this);
-            Program.Engine.AddEntity(Program.GameState, this.diceFace);
-            Program.Engine.AddEntity(Program.GameState, this.symbolEntity);
+            Program.Engine.AddEntity(Program.GameStateIndex, this);
+            Program.Engine.AddEntity(Program.GameStateIndex, this.diceFace);
+            Program.Engine.AddEntity(Program.GameStateIndex, this.symbolEntity);
 
             this.held = held;
-            MouseControllerInfo info = Program.Engine.Controllers(Program.GameState)[0][Keys.CLICK].Info as MouseControllerInfo;
+            MouseControllerInfo info = Program.Engine.Controllers(Program.GameStateIndex)[0][Keys.CLICK].Info as MouseControllerInfo;
 
             lastMousePos = new Point(info.X, info.Y);
         }
@@ -184,13 +226,13 @@ namespace Game
 
         public void Despawn()
         {
-            Program.Engine.Location(Program.GameState).RemoveEntity(this.Id);
-            Program.Engine.Location(Program.GameState).RemoveEntity(this.diceFace.Id);
+            Program.Engine.Location(Program.GameStateIndex).RemoveEntity(this.Id);
+            Program.Engine.Location(Program.GameStateIndex).RemoveEntity(this.diceFace.Id);
             if (this.showHealth)
             {
-                Program.Engine.Location(Program.GameState).RemoveEntity(this.healthEntity.Id);
+                Program.Engine.Location(Program.GameStateIndex).RemoveEntity(this.healthEntity.Id);
             }
-            Program.Engine.Location(Program.GameState).RemoveEntity(this.symbolEntity.Id);
+            Program.Engine.Location(Program.GameStateIndex).RemoveEntity(this.symbolEntity.Id);
             this.diceInfoEntity.Hide();
 
             this.IsLocked = false;

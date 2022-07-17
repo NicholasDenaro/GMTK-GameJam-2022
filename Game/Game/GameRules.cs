@@ -19,7 +19,7 @@ namespace Game
 
         public static int Lives { get; private set; }
 
-        public static int Coins { get; set; } = 5;
+        public static int Coins { get; private set; } = 5;
 
         public static int RecruitmentSlots { get; set; }
         public static int RecruitmentTier { get; set; }
@@ -52,7 +52,7 @@ namespace Game
 
         public static int NumberOfDiceInPlay()
         {
-            return Program.Engine.Location(Program.GameState).Entities.Count(entity => entity is Dice);
+            return Program.Engine.Location(Program.GameStateIndex).Entities.Count(entity => entity is Dice);
         }
 
         public static List<Dice> GetDiceInPlay()
@@ -112,6 +112,11 @@ namespace Game
             CurrentDiceInPlay = 0;
 
             (rollsLeftEntity.Description as TextDescription).ChangeText($"{RollsLeft}/{MaxRolls}");
+
+            if (Program.Scorecard.IsComplete())
+            {
+                Program.Scorecard.AdvanceLevel(Program.GameLocation);
+            }
         }
 
         public static void EndBattle()
@@ -133,7 +138,7 @@ namespace Game
                 Lives--;
                 if (Lives == 0 || Program.DiceBag.Count == 0)
                 {
-                    Program.Engine.SetLocation(Program.GameState, Program.GameOverLocation);
+                    Program.Engine.SetLocation(Program.GameStateIndex, Program.GameOverLocation);
                     return;
                 }
                 else
@@ -144,8 +149,7 @@ namespace Game
             }
             else
             {
-                Coins += 5;
-                (coinsEntity.Description as TextDescription).ChangeText($"{Coins:000}");
+                GainCoins(5);
             }
 
             Program.BattleLocation.RemoveEntity(battleEndEntity.Id);
@@ -155,14 +159,14 @@ namespace Game
             // This could be fine if you don't try to add the same entities back in, but adding is done first. Maybe swap the order of remove and add?
             // Don't add and silently continue because then they'll be removed
             Program.BattleLocation.Tick(new GameState());
-            Program.Engine.SetLocation(Program.GameState, Program.GameLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.GameLocation);
 
             Reset();
         }
 
         public static void OpenShop()
         {
-            Program.Engine.SetLocation(Program.GameState, Program.ShopLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.ShopLocation);
 
             foreach (Dice dice in GetDiceInPlay())
             {
@@ -174,7 +178,33 @@ namespace Game
         public static void CloseShop()
         {
             Reset();
-            Program.Engine.SetLocation(Program.GameState, Program.GameLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.GameLocation);
+        }
+
+        public static void CloseUpgrades()
+        {
+            Reset();
+            foreach (Entity entity in Program.UpgradeLocation.Entities.Where(ent => ent is not Button))
+            {
+                Program.UpgradeLocation.RemoveEntity(entity.Id);
+            }
+
+            // TODO: Big Hack
+            Program.UpgradeLocation.Tick(new GameState());
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.GameLocation);
+        }
+
+        public static void CloseRecruitment()
+        {
+            Reset();
+            foreach (Entity entity in Program.RecruitLocation.Entities.Where(ent => ent is not Button))
+            {
+                Program.RecruitLocation.RemoveEntity(entity.Id);
+            }
+
+            // TODO: Big Hack
+            //Program.RecruitLocation.Tick(Program.State);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.GameLocation);
         }
 
         public static void HealDice(List<Dice> diceList)
@@ -193,7 +223,7 @@ namespace Game
                 dice.Despawn();
                 Program.DiceBag.AddDice(dice);
             }
-            Program.Engine.SetLocation(Program.GameState, Program.UpgradeLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.UpgradeLocation);
 
             Description2D d2d;
             Entity ent;
@@ -211,16 +241,26 @@ namespace Game
                 int x = Program.Width / (numDice + 2) / 2 + (i + 1) * Program.Width / (numDice + 2) - Program.Width / (numDice + 2) / 2;
                 int y = 80;
 
+                // show original
                 Program.UpgradeLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["dice"], x + 16, y - 24)));
                 d2d.ImageIndex = (dice.Description as Description2D).ImageIndex;
 
                 dice.ForceShowInfo(Program.UpgradeLocation, x - 24, y + 32);
 
-                Program.UpgradeLocation.AddEntity(ent = new Entity(new TextDescription($"{cost:00}", x + 16 - 14, y + 96 - 10)));
-                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16 + 14, y + 96 + 2)));
+                // show upgrade
+                Dice upg = Dice.Create(dice.GetUpgradeInfo(), x, y + 128);
+                Program.UpgradeLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["dice"], x + 16, y - 24 + 128)));
+                d2d.ImageIndex = (upg.Description as Description2D).ImageIndex;
+
+                upg.ForceShowInfo(Program.UpgradeLocation, x, y + 120);
+
+                // buy button
+                int offsetY = 112;
+                Program.UpgradeLocation.AddEntity(ent = new Entity(new TextDescription($"{cost:00}", x + 16 - 14, y + 96 - 10 + offsetY)));
+                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16 + 14, y + 96 + 2 + offsetY)));
                 d2d.ImageIndex = 7;
 
-                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16, y + 112)));
+                Program.UpgradeLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16, y + 112 + offsetY)));
                 d2d.ImageIndex = 5;
                 ent.TickAction += (state, entity) =>
                 {
@@ -232,7 +272,7 @@ namespace Game
                         {
                             description.ImageIndex = 6;
                             dice.Upgrade();
-                            GameRules.Coins -= cost;
+                            SpendCoins(cost);
                         }
                     }
                 };
@@ -247,7 +287,7 @@ namespace Game
                 Program.DiceBag.AddDice(dice);
             }
 
-            Program.Engine.SetLocation(Program.GameState, Program.RecruitLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.RecruitLocation);
 
             var presets = Program.DicePresetsT1;
             if (RecruitmentTier == 1)
@@ -298,7 +338,7 @@ namespace Game
                         {
                             description.ImageIndex = 6;
                             Program.DiceBag.AddDice(dice);
-                            GameRules.Coins -= cost;
+                            SpendCoins(cost);
                         }
                     }
                 };
@@ -319,6 +359,7 @@ namespace Game
             turn = 0;
             timer = 0;
             actionTimer = 0;
+            battleShield = 0;
 
             battleDice = diceToBattle;
             string info = $"{health}♥ {attack}⸸";
@@ -376,6 +417,20 @@ namespace Game
             battleDice.AddRange(line2);
             battleDice.AddRange(line3);
             battleDice.AddRange(line4);
+        }
+
+        public static void SpendCoins(int coins)
+        {
+            Coins -= coins;
+            Program.PlayCoinSound();
+            (coinsEntity.Description as TextDescription).ChangeText($"{Coins:000}");
+        }
+
+        public static void GainCoins(int coins)
+        {
+            Coins += coins;
+            Program.PlayCoinSound();
+            (coinsEntity.Description as TextDescription).ChangeText($"{Coins:000}");
         }
 
         static int timer = 0;

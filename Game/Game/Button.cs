@@ -28,6 +28,16 @@ namespace Game
 
         public override void Tick(GameState state)
         {
+            if (state.Controllers.Count == 0)
+            {
+                return;
+            }
+
+            if (!state.Location.Entities.Contains(textEntity))
+            {
+                state.Location.AddEntity(textEntity);
+            }
+
             if (Enabled && state.Controllers[0][Program.Keys.CLICK].IsPress())
             {
                 Description2D description = this.Description as Description2D;

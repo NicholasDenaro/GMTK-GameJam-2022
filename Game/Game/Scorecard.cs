@@ -27,10 +27,22 @@ namespace Game
             sheets[level].Display(location);
         }
 
+        public void AdvanceLevel(Location location)
+        {
+            sheets[level].Hide(location);
+            level++;
+            LoadSheet(location);
+        }
+
+        public bool IsComplete()
+        {
+            return sheets[level].IsComplete();
+        }
+
         private Sheet[] GenerateRun()
         {
             var description = this.Description as Description2D;
-            return new Sheet[] { new Sheet((int)description.X , (int)description.Y) };
+            return new Sheet[] { new Sheet(0, (int)description.X , (int)description.Y), new Sheet(1, (int)description.X, (int)description.Y) };
         }
     }
 
@@ -39,31 +51,64 @@ namespace Game
         private Quest[] quests;
         private SideQuest[] sideQuests;
            
-        public Sheet(int x , int y)
+        public Sheet(int level, int x , int y)
         {
             int xoffset = 36;
             int yoffset = 40;
             int yy = 0;
 
-            quests = new Quest[]
+            if (level == 0)
             {
-                new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
-                new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
-            };
+                quests = new Quest[]
+                {
+                    new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                };
 
-            yoffset += yy * 20;
-            yy = 0;
-            sideQuests = new SideQuest[]
+                yoffset += yy * 20;
+                yy = 0;
+                sideQuests = new SideQuest[]
+                {
+                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                };
+            }
+            else
             {
-                new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
-                new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
-                new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
-                new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
-            };
+                quests = new Quest[]
+                {
+                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("8♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("3♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("5♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                    new Quest("8♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20),
+                };
+
+                yoffset += yy * 20;
+                yy = 0;
+                sideQuests = new SideQuest[]
+                {
+                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
+                };
+            }
+        }
+
+        public bool IsComplete()
+        {
+            return this.quests.All(quest => quest.IsComplete()) && this.sideQuests.All(quest => quest.IsComplete());
         }
 
         public void Display(Location location)
@@ -76,6 +121,19 @@ namespace Game
             for (int i = 0; i < sideQuests.Length; i++)
             {
                 sideQuests[i].Display(location);
+            }
+        }
+
+        public void Hide(Location location)
+        {
+            for (int i = 0; i < quests.Length; i++)
+            {
+                quests[i].Hide(location);
+            }
+
+            for (int i = 0; i < sideQuests.Length; i++)
+            {
+                sideQuests[i].Hide(location);
             }
         }
     }
@@ -102,7 +160,15 @@ namespace Game
             location.AddEntity(textEntity);
             location.AddEntity(checkBoxEntity);
 
-            Program.Engine.TickEnd(Program.GameState) += Tick;
+            Program.Engine.TickEnd(Program.GameStateIndex) += Tick;
+        }
+
+        public void Hide(Location location)
+        {
+            location.RemoveEntity(textEntity.Id);
+            location.RemoveEntity(checkBoxEntity.Id);
+
+            Program.Engine.TickEnd(Program.GameStateIndex) -= Tick;
         }
 
         protected virtual bool CanStart()
@@ -125,7 +191,7 @@ namespace Game
                 dice.Despawn();
             }
 
-            Program.Engine.SetLocation(Program.GameState, Program.BattleLocation);
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.BattleLocation);
             Regex r = new Regex("(?<health>[0-9]+).*(?<attack>[0-9]+)");
             var match = r.Match(Text);
             GameRules.InitBattle(diceToBattle, int.Parse(match.Groups["health"].Value), int.Parse(match.Groups["attack"].Value));
@@ -159,6 +225,11 @@ namespace Game
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
                 }
             }
+        }
+
+        public virtual bool IsComplete()
+        {
+            return ((Description2D)checkBoxEntity.Description).ImageIndex == 6;
         }
     }
 
