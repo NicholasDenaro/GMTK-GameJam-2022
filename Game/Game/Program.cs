@@ -127,13 +127,13 @@ namespace Game
                 {
                     if (state.Controllers[1][Keys.DEBUG].IsPress())
                     {
-                        List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
+                        //List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
                         //GameRules.UpgradeDice(dice);
                         //GameRules.RecruitDice();
 
                         //StopSounds();
                         //GameRules.OpenShop();
-                        GameRules.GameOver();
+                        //GameRules.GameOver();
                     }
                 }
 

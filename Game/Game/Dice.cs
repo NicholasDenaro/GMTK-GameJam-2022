@@ -464,6 +464,14 @@ namespace Game
                     this.ResetPositions();
                 }
 
+                Dice collide = null;
+                while (state.Location.Entities.Where(entity => entity is Dice && entity != this).Select(entity => entity as Dice).Any(dice => (collide = dice).description.IsCollision(this.description)))
+                {
+                    double direction = Math.Atan2(collide.description.Y - this.description.Y, collide.description.X - this.description.X) + Math.PI * 0.9;
+                    this.description.ChangeCoordsDelta(Math.Cos(direction) * 4, Math.Sin(direction) * 4);
+                    this.ResetPositions();
+                }
+
                 showHealth = false;
                 state.Location.RemoveEntity(healthEntity.Id);
             }
