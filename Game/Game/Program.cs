@@ -127,13 +127,14 @@ namespace Game
                 {
                     if (state.Controllers[1][Keys.DEBUG].IsPress())
                     {
-                        //List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
-                        //GameRules.UpgradeDice(dice);
-                        //GameRules.RecruitDice();
+                        List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
 
+                        //GameRules.GainCoins(10);
                         //StopSounds();
                         //GameRules.OpenShop();
                         //GameRules.GameOver();
+                        //GameRules.RecruitDice();
+                        //GameRules.UpgradeDice(dice);
                     }
                 }
 
@@ -397,8 +398,8 @@ namespace Game
             ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Scorecard"], 16, 16, 320, 144)));
 
             int xOffset = 48;
-            int yOffset = 36;
             int yMult = 28;
+            int yOffset = 36 + yMult / 2;
 
             ShopLocation.AddEntity(new Entity(new TextDescription("+1 dice slot ................... 05", xOffset + 24, yOffset + yMult * 0)));
             ShopLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], xOffset + 256, yOffset + 12 + yMult * 0)));

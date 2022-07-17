@@ -122,7 +122,18 @@ namespace Game
             }
             else
             {
+                bool bonus = false;
+                if (upgradeIndex + 1 >= upgradeTree.Count)
+                {
+                    upgradeIndex--;
+                    bonus = true;
+                }
                 info = Program.DicePresetsT3[upgradeTree[upgradeIndex + 1]];
+
+                if (bonus)
+                {
+                    info.numRolls = this.NumRolls + 1;
+                }
             }
 
             return info;
@@ -154,6 +165,7 @@ namespace Game
                 upgradeTree = Program.WarriorUpgrades;
             }
 
+            bool bonus = false;
             if (upgradeIndex < 1)
             {
                 info = Program.DicePresetsT1[upgradeTree[upgradeIndex + 1]];
@@ -164,12 +176,24 @@ namespace Game
             }
             else
             {
+                if (upgradeIndex + 1 >= upgradeTree.Count)
+                {
+                    upgradeIndex--;
+                    bonus = true;
+                }
                 info = Program.DicePresetsT3[upgradeTree[upgradeIndex + 1]];
             }
 
             this.maxHealth = info.health;
             this.health = info.health;
-            this.NumRolls = info.numRolls;
+            if (!bonus)
+            {
+                this.NumRolls = info.numRolls;
+            }
+            else
+            {
+                this.NumRolls++;
+            }
             this.sides = (int)info.sides;
             this.Faces = info.faces.Select(f => (int)f).ToArray();
             index = 0;

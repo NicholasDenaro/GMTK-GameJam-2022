@@ -80,18 +80,28 @@ namespace Game
             ((Description2D)diceSlotsSymbol.Description).ImageIndex = 3;
             Program.GameLocation.AddEntity(diceSlotsEntity);
             Program.GameLocation.AddEntity(diceSlotsSymbol);
+            Program.ShopLocation.AddEntity(diceSlotsEntity);
+            Program.ShopLocation.AddEntity(diceSlotsSymbol);
 
             coinsEntity = new Entity(new TextDescription($"{Coins:000}", 40, 30));
             coinsSymbol = new Entity(new Description2D(Sprite.Sprites["Symbols"], 40 + 40, 30 + 12));
             ((Description2D)coinsSymbol.Description).ImageIndex = 7;
             Program.GameLocation.AddEntity(coinsEntity);
             Program.GameLocation.AddEntity(coinsSymbol);
+            Program.ShopLocation.AddEntity(coinsEntity);
+            Program.ShopLocation.AddEntity(coinsSymbol);
+            Program.UpgradeLocation.AddEntity(coinsEntity);
+            Program.UpgradeLocation.AddEntity(coinsSymbol);
+            Program.RecruitLocation.AddEntity(coinsEntity);
+            Program.RecruitLocation.AddEntity(coinsSymbol);
 
             rollsLeftEntity = new Entity(new TextDescription($"{RollsLeft}/{MaxRolls}", 100, 10));
             rollsLeftSymbol = new Entity(new Description2D(Sprite.Sprites["Symbols"], 100 + 40, 10 + 12));
             ((Description2D)rollsLeftSymbol.Description).ImageIndex = 4;
             Program.GameLocation.AddEntity(rollsLeftEntity);
             Program.GameLocation.AddEntity(rollsLeftSymbol);
+            Program.ShopLocation.AddEntity(rollsLeftEntity);
+            Program.ShopLocation.AddEntity(rollsLeftSymbol);
 
             Program.GameLocation.AddEntity(livesEntity = new Entity(livesDescription = new TextDescription(new string('♥', Lives), 160, 10)));
 
@@ -148,7 +158,7 @@ namespace Game
                 else
                 {
                     livesDescription.ChangeText(new string('♥', Lives));
-                    livesDescription.ChangeCoordsDelta(20, 0);
+                    livesDescription.ChangeCoordsDelta(16, 0);
                 }
             }
             else
