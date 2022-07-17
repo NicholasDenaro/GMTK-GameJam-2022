@@ -63,6 +63,7 @@ namespace Game
                         if (this.dice.Any() && GameRules.CanDrawAnotherDice())
                         {
                             DrawDice().Spawn(info.X, info.Y, true);
+                            GameRules.MustRoll = true;
                         }
                     }
                     

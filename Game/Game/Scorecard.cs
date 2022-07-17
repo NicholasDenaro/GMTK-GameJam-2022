@@ -242,7 +242,7 @@ namespace Game
 
         protected virtual bool CanStart()
         {
-            return GameRules.RollsLeft != GameRules.MaxRolls && GameRules.GetDiceInPlay().Any(dice => dice.IsLocked);
+            return GameRules.RollsLeft != GameRules.MaxRolls && GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && !GameRules.MustRoll;
         }
 
         protected virtual void GoOnQuest()

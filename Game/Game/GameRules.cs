@@ -16,6 +16,7 @@ namespace Game
 
         public static int MaxRolls { get; set; }
         public static int RollsLeft { get; private set; }
+        public static bool MustRoll { get; set; }
 
         public static int Lives { get; private set; }
 
@@ -63,7 +64,7 @@ namespace Game
 
         public static bool CanDrawAnotherDice()
         {
-            return DiceSlots - NumberOfDiceInPlay() > 0;
+            return DiceSlots - NumberOfDiceInPlay() > 0 && RollsLeft > 0;
         }
 
         public static void Init()
@@ -548,6 +549,7 @@ namespace Game
                         dice.Roll(withVelocity: true);
                     }
 
+                    MustRoll = false;
                     RollsLeft--;
                     ((TextDescription)rollsLeftEntity.Description).ChangeText($"{RollsLeft}/{MaxRolls}");
                 }

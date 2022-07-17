@@ -41,6 +41,7 @@ namespace Game
         private bool showHealth;
         private bool showInfo;
         private bool held;
+        private bool canLock;
         public bool IsLocked { get; private set; }
 
         public bool IsFullHealth => this.health == this.maxHealth;
@@ -201,6 +202,8 @@ namespace Game
             MouseControllerInfo info = Program.Engine.Controllers(Program.GameStateIndex)[0][Keys.CLICK].Info as MouseControllerInfo;
 
             lastMousePos = new Point(info.X, info.Y);
+
+            this.canLock = false;
         }
 
         public void MoveToBattle(int row, int index, int count)
@@ -329,6 +332,8 @@ namespace Game
                 this.fastRolling = true;
                 Program.PlayQuickRollingDice();
             }
+
+            this.canLock = true;
         }
 
         public void ForceShowInfo(Location location)
@@ -368,7 +373,7 @@ namespace Game
             }
 
             // Lock
-            if (!GameRules.IsBattling && GameRules.RollsLeft != GameRules.MaxRolls && !IsRolling && state.Controllers[0][Keys.RCLICK].IsPress())
+            if (!GameRules.IsBattling && GameRules.RollsLeft != GameRules.MaxRolls && this.canLock && !IsRolling && state.Controllers[0][Keys.RCLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Keys.RCLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
