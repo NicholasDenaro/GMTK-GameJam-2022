@@ -151,6 +151,9 @@ namespace Game
                     MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
                     if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                     {
+                        description.ImageIndex = 6;
+                        GameRules.RecruitmentSlots++;
+                        GameRules.Coins -= 10;
                     }
                 }
             };
@@ -169,11 +172,19 @@ namespace Game
                     if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
                     {
                         description.ImageIndex = 6;
+                        GameRules.RecruitmentTier++;
+                        GameRules.Coins -= 15;
                     }
                 }
             };
 
             ShopLocation.AddEntity(new Button(Program.ShopLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
+
+            // Recruitment
+            RecruitLocation.AddEntity(new Button(Program.RecruitLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
+
+            // Upgrade
+            UpgradeLocation.AddEntity(new Button(Program.UpgradeLocation, "Back", Program.Width - 80 - 16, Program.Height - 32 - 16, GameRules.CloseShop));
         }
 
         private static void GameSetup()

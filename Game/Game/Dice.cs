@@ -41,6 +41,7 @@ namespace Game
         private bool showInfo;
         private bool held;
         public bool IsLocked { get; private set; }
+
         public bool IsFullHealth => this.health == this.maxHealth;
         private bool fastRolling;
         public Faces Face => (Faces)this.Faces[index % this.Faces.Length];
@@ -229,6 +230,11 @@ namespace Game
                 this.rollingTime = Program.FPS / 2;
                 this.fastRolling = true;
             }
+        }
+
+        public void ForceShowInfo(Location location)
+        {
+            this.diceInfoEntity.Display(location);
         }
 
         private void SetRollingTime()

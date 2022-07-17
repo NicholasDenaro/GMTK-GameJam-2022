@@ -21,6 +21,9 @@ namespace Game
 
         public static int Coins { get; set; } = 5;
 
+        public static int RecruitmentSlots { get; set; }
+        public static int RecruitmentTier { get; set; }
+
         public static bool IsBattling { get; private set; }
         public static bool IsBattlingFinished { get; private set; }
 
@@ -164,6 +167,7 @@ namespace Game
             foreach (Dice dice in GetDiceInPlay())
             {
                 dice.Despawn();
+                Program.DiceBag.AddDice(dice);
             }
         }
 
@@ -184,13 +188,79 @@ namespace Game
         }
         public static void UpgradeDice(List<Dice> diceList)
         {
+            foreach (Dice dice in GetDiceInPlay())
+            {
+                dice.Despawn();
+                Program.DiceBag.AddDice(dice);
+            }
             Program.Engine.SetLocation(Program.GameState, Program.UpgradeLocation);
 
-
         }
-        public static void RecruitDice(List<Dice> diceList)
+
+        public static void RecruitDice()
         {
+            foreach (Dice dice in GetDiceInPlay())
+            {
+                dice.Despawn();
+                Program.DiceBag.AddDice(dice);
+            }
+
             Program.Engine.SetLocation(Program.GameState, Program.RecruitLocation);
+
+            var presets = Program.DicePresetsT1;
+            if (RecruitmentTier == 1)
+            {
+                presets = Program.DicePresetsT2;
+            }
+            if (RecruitmentTier == 2)
+            {
+                presets = Program.DicePresetsT3;
+            }
+
+            var keys = presets.Keys.ToList();
+            Description2D d2d;
+            Entity ent;
+            for (int i = 0; i < 5; i++)
+            {
+                if ((i == 0 && RecruitmentSlots == 0) || (i == 4 && RecruitmentSlots < 2))
+                {
+                    continue;
+                }
+
+                int key = Program.Random.Next(keys.Count);
+
+                int cost = (key < 3 ? 3 : 5) * (RecruitmentTier + 1);
+
+                int x = Program.Width / 10 + i * Program.Width / 5 - Program.Width / 10;
+                int y = 80;
+                Dice dice = Dice.Create(presets[keys[key]], x, y);
+
+                Program.RecruitLocation.AddEntity(new Entity(d2d = new Description2D(Sprite.Sprites["dice"], x + 16, y - 24)));
+                d2d.ImageIndex = (dice.Description as Description2D).ImageIndex;
+
+                dice.ForceShowInfo(Program.RecruitLocation);
+
+                Program.RecruitLocation.AddEntity(ent = new Entity(new TextDescription($"{cost:00}", x + 16 - 14, y + 96 - 10)));
+                Program.RecruitLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16 + 14, y + 96 + 2)));
+                d2d.ImageIndex = 7;
+
+                Program.RecruitLocation.AddEntity(ent = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], x + 16, y + 112)));
+                d2d.ImageIndex = 5;
+                ent.TickAction += (state, entity) =>
+                {
+                    Description2D description = entity.Description as Description2D;
+                    if (GameRules.Coins >= cost && description.ImageIndex == 5 && state.Controllers[0][Program.Keys.CLICK].IsPress())
+                    {
+                        MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
+                        if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
+                        {
+                            description.ImageIndex = 6;
+                            Program.DiceBag.AddDice(dice);
+                            GameRules.Coins -= cost;
+                        }
+                    }
+                };
+            }
         }
 
         private static int battleEnemyHealth;

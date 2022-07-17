@@ -91,51 +91,61 @@ namespace Game
             (this.rollsIconEntity.Description as Description2D).ChangeCoordsDelta(dx, dy);
         }
 
-        public void Display()
+        public void Display(Location location = null)
         {
+            if (location == null)
+            {
+                location = Program.GameLocation;
+            }
+
             if (!isShown)
             {
-                Program.GameLocation.AddEntity(this);
+                location.AddEntity(this);
 
-                Program.GameLocation.AddEntity(swordCountEntity);
-                Program.GameLocation.AddEntity(swordIconEntity);
+                location.AddEntity(swordCountEntity);
+                location.AddEntity(swordIconEntity);
 
-                Program.GameLocation.AddEntity(shieldCountEntity);
-                Program.GameLocation.AddEntity(shieldIconEntity);
+                location.AddEntity(shieldCountEntity);
+                location.AddEntity(shieldIconEntity);
 
-                Program.GameLocation.AddEntity(bowCountEntity);
-                Program.GameLocation.AddEntity(bowIconEntity);
+                location.AddEntity(bowCountEntity);
+                location.AddEntity(bowIconEntity);
 
-                Program.GameLocation.AddEntity(healCountEntity);
-                Program.GameLocation.AddEntity(healIconEntity);
+                location.AddEntity(healCountEntity);
+                location.AddEntity(healIconEntity);
 
-                Program.GameLocation.AddEntity(rollsCountEntity);
-                Program.GameLocation.AddEntity(rollsIconEntity);
+                location.AddEntity(rollsCountEntity);
+                location.AddEntity(rollsIconEntity);
 
                 isShown = true;
             }
         }
 
-        public void Hide()
+        public void Hide(Location location = null)
         {
+            if (location == null)
+            {
+                location = Program.GameLocation;
+            }
+
             if (isShown)
             {
-                Program.GameLocation.RemoveEntity(this.Id);
+                location.RemoveEntity(this.Id);
 
-                Program.GameLocation.RemoveEntity(swordCountEntity.Id);
-                Program.GameLocation.RemoveEntity(swordIconEntity.Id);
+                location.RemoveEntity(swordCountEntity.Id);
+                location.RemoveEntity(swordIconEntity.Id);
 
-                Program.GameLocation.RemoveEntity(shieldCountEntity.Id);
-                Program.GameLocation.RemoveEntity(shieldIconEntity.Id);
+                location.RemoveEntity(shieldCountEntity.Id);
+                location.RemoveEntity(shieldIconEntity.Id);
 
-                Program.GameLocation.RemoveEntity(bowCountEntity.Id);
-                Program.GameLocation.RemoveEntity(bowIconEntity.Id);
+                location.RemoveEntity(bowCountEntity.Id);
+                location.RemoveEntity(bowIconEntity.Id);
 
-                Program.GameLocation.RemoveEntity(healCountEntity.Id);
-                Program.GameLocation.RemoveEntity(healIconEntity.Id);
+                location.RemoveEntity(healCountEntity.Id);
+                location.RemoveEntity(healIconEntity.Id);
 
-                Program.GameLocation.RemoveEntity(rollsCountEntity.Id);
-                Program.GameLocation.RemoveEntity(rollsIconEntity.Id);
+                location.RemoveEntity(rollsCountEntity.Id);
+                location.RemoveEntity(rollsIconEntity.Id);
 
                 isShown = false;
             }

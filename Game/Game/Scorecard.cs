@@ -105,6 +105,11 @@ namespace Game
             Program.Engine.TickEnd(Program.GameState) += Tick;
         }
 
+        protected virtual bool CanStart()
+        {
+            return GameRules.RollsLeft != GameRules.MaxRolls && GameRules.GetDiceInPlay().Any(dice => dice.IsLocked);
+        }
+
         protected virtual void GoOnQuest()
         {
             List<Dice> diceToBattle = Program.GameLocation.Entities.Where(entity => entity is Dice && (entity as Dice).IsLocked).Select(entity => entity as Dice).ToList();
@@ -130,7 +135,7 @@ namespace Game
         private void Tick(object sender, GameState state)
         {
             var description = checkBoxEntity.Description as Description2D;
-            if (((Description2D)checkBoxEntity.Description).ImageIndex == 5 && GameRules.RollsLeft != GameRules.MaxRolls && state.Controllers[0][Program.Keys.CLICK].IsPress())
+            if (((Description2D)checkBoxEntity.Description).ImageIndex == 5 && CanStart() && state.Controllers[0][Program.Keys.CLICK].IsPress())
             {
                 MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
                 if (description.IsCollision(new Description2D(info.X + description.Sprite.X, info.Y + description.Sprite.Y, 1, 1)))
@@ -140,20 +145,16 @@ namespace Game
                 }
             }
 
-            if (GameRules.RollsLeft != GameRules.MaxRolls)
+            if (CanStart())
             {
-                if (GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 0)
+                if (((Description2D)checkBoxEntity.Description).ImageIndex == 0)
                 {
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 5;
-                }
-                else if (!GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 5)
-                {
-                    ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
                 }
             }
             else
             {
-                if (!GameRules.GetDiceInPlay().Any(dice => dice.IsLocked) && ((Description2D)checkBoxEntity.Description).ImageIndex == 5)
+                if (((Description2D)checkBoxEntity.Description).ImageIndex == 5)
                 {
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 0;
                 }
@@ -169,6 +170,12 @@ namespace Game
         {
             this.name = name;
         }
+
+        protected override bool CanStart()
+        {
+            return name == "Shop" || name == "Recruit" ||  GameRules.CurrentDiceInPlay > 0;
+        }
+
         protected override void GoOnQuest()
         {
             switch(name)
@@ -209,8 +216,7 @@ namespace Game
         }
         private void RecruitMoreDice()
         {
-            List<Dice> dice = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice).ToList();
-            GameRules.RecruitDice(dice);
+            GameRules.RecruitDice();
         }
     }
 }
