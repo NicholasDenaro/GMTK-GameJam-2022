@@ -101,10 +101,10 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
-                    new Quest("8♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
-                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
-                    new Quest("3♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("10♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("6♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
                     new Quest("5♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
                     new Quest("8♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
@@ -126,12 +126,12 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("5♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
-                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
-                    new Quest("12♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
-                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
-                    new Quest("15♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
-                    new Quest("20♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
+                    new Quest("8♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("12♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("15♥ 4⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("18♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("18♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    new Quest("24♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
@@ -151,10 +151,10 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("15♥ 5⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
-                    new Quest("20♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
-                    new Quest("25♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
-                    new Quest("28♥ 8⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("20♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("25♥ 6⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("35♥ 7⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("40♥ 8⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
                     new Quest("50♥ 10⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
                 };
 

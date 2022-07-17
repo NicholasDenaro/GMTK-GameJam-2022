@@ -41,6 +41,8 @@ namespace Game
         private static Entity livesEntity;
         private static TextDescription livesDescription;
 
+        private static Entity levelEntity;
+
         //Battle
         private static Entity battleEnemyEntity;
         private static Entity battleEnemyImageEntity;
@@ -105,6 +107,9 @@ namespace Game
 
             Program.GameLocation.AddEntity(livesEntity = new Entity(livesDescription = new TextDescription(new string('♥', Lives), 160, 10)));
 
+            // Showw level
+            Program.GameLocation.AddEntity(levelEntity = new Entity(new TextDescription($"Level {Program.Scorecard.Level + 1} / 4", 160 - 52, 30)));
+
             Program.Engine.TickEnd(0) += GameRules.Tick;
 
             // Battle
@@ -130,6 +135,7 @@ namespace Game
             if (Program.Scorecard.IsComplete())
             {
                 Program.Scorecard.AdvanceLevel(Program.GameLocation);
+                (levelEntity.Description as TextDescription).ChangeText($"Level {Program.Scorecard.Level + 1} / 4");
             }
         }
 
