@@ -43,6 +43,8 @@ namespace Game
 
         private static Entity levelEntity;
 
+        private static Entity helpEntity;
+
         //Battle
         private static Entity battleEnemyEntity;
         private static Entity battleEnemyImageEntity;
@@ -109,7 +111,7 @@ namespace Game
 
             // Show level
             Program.GameLocation.AddEntity(levelEntity = new Entity(new TextDescription($"Level {Program.Scorecard.Level + 1} / 4", 160 - 52, 30)));
-            Program.GameLocation.AddEntity(levelEntity = new Entity(new TextDescription($"Draw dice from the bag\nby click and dragging", 192 + 16, 192 + 32 + 48 + 8, 10)));
+            Program.GameLocation.AddEntity(helpEntity = new Entity(new TextDescription($"Draw dice from the bag\nby click and dragging", 192 + 16, 192 + 32 + 48 + 8, 10)));
 
             Program.Engine.TickEnd(0) += GameRules.Tick;
 
