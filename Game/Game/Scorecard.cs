@@ -34,7 +34,14 @@ namespace Game
         {
             sheets[Level].Hide(location);
             Level++;
-            LoadSheet(location);
+            if (Level <= this.sheets.Length)
+            {
+                LoadSheet(location);
+            }
+            else
+            {
+                GameRules.WinScreen();
+            }
         }
 
         public bool IsComplete()
@@ -45,7 +52,12 @@ namespace Game
         private Sheet[] GenerateRun()
         {
             var description = this.Description as Description2D;
-            return new Sheet[] { new Sheet(0, (int)description.X , (int)description.Y), new Sheet(1, (int)description.X, (int)description.Y) };
+            return new Sheet[] { 
+                new Sheet(0, (int)description.X , (int)description.Y),
+                new Sheet(1, (int)description.X, (int)description.Y),
+                new Sheet(2, (int)description.X, (int)description.Y),
+                new Sheet(3, (int)description.X, (int)description.Y),
+            };
         }
     }
 

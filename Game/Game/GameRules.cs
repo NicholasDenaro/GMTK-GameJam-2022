@@ -141,7 +141,7 @@ namespace Game
                 Lives--;
                 if (Lives == 0 || Program.DiceBag.Count == 0)
                 {
-                    Program.Engine.SetLocation(Program.GameStateIndex, Program.GameOverLocation);
+                    GameRules.GameOver();
                     return;
                 }
                 else
@@ -167,6 +167,18 @@ namespace Game
             Reset();
 
             Program.PlayChatterSound();
+        }
+
+        public static void WinScreen()
+        {
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.WinLocation);
+            Program.MakeQuiet();
+        }
+
+        public static void GameOver()
+        {
+            Program.Engine.SetLocation(Program.GameStateIndex, Program.GameOverLocation);
+            Program.MakeQuiet();
         }
 
         public static void OpenShop()

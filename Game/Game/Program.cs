@@ -34,7 +34,12 @@ namespace Game
         public const int Height = 320;
 
         public static bool Mute { get; set; } = false;
+        public static bool Quiet { get; set; } = false;
         public static Entity MuteEntity { get; private set; }
+        public static Entity MuteTextEntity { get; private set; }
+
+        public static Entity QuietEntity { get; private set; }
+        public static Entity QuietTextEntity { get; private set; }
 
         public static GameState State { get; private set; }
 
@@ -45,6 +50,7 @@ namespace Game
         public  static Location BattleLocation { get; private set; }
         public static Location UpgradeLocation { get; private set; }
         public static Location RecruitLocation { get; private set; }
+        public static Location WinLocation { get; private set; }
 
         public static Scorecard Scorecard { get; private set; }
 
@@ -75,6 +81,7 @@ namespace Game
             ShopLocation = new Location(new Description2D(0, 0, Width, Height));
             UpgradeLocation = new Location(new Description2D(0, 0, Width, Height));
             RecruitLocation = new Location(new Description2D(0, 0, Width, Height));
+            WinLocation = new Location(new Description2D(0, 0, Width, Height));
 
             new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
@@ -88,10 +95,17 @@ namespace Game
 
 
             Description2D d2d;
-            MuteEntity = new Entity(d2d = new Description2D(Sprite.Sprites["Symbols"], Program.Width - 9, 8));
+            Description2D d2dMute;
+            Description2D d2dQuiet;
+            MuteTextEntity = new Entity(d2d = new TextDescription("Mute:", Program.Width - 64, -4));
+            MuteEntity = new Entity(d2d = d2dMute = new Description2D(Sprite.Sprites["Symbols"], Program.Width - 9, 8));
             d2d.ImageIndex = 9;
             d2d.ZIndex = 1000;
 
+            QuietTextEntity = new Entity(d2d = new TextDescription("Quiet:", Program.Width - 144, -4));
+            QuietEntity = new Entity(d2d = d2dQuiet = new Description2D(Sprite.Sprites["Symbols"], Program.Width - 96 + 10, 8));
+            d2d.ImageIndex = 5;
+            d2d.ZIndex = 1000;
 
             MainMenuSetup();
 
@@ -118,24 +132,39 @@ namespace Game
                         //GameRules.RecruitDice();
 
                         //StopSounds();
-                        GameRules.OpenShop();
+                        //GameRules.OpenShop();
+                        GameRules.GameOver();
                     }
                 }
 
                 if (state.Controllers[0][Program.Keys.CLICK].IsPress())
                 {
                     MouseControllerInfo info = state.Controllers[0][Program.Keys.CLICK].Info as MouseControllerInfo;
-                    if (d2d.IsCollision(new Description2D(info.X + d2d.Sprite.X, info.Y + d2d.Sprite.Y, 1, 1)))
+                    if (d2dMute.IsCollision(new Description2D(info.X + d2dMute.Sprite.X, info.Y + d2dMute.Sprite.Y, 1, 1)))
                     {
                         if (Mute)
                         {
-                            d2d.ImageIndex += 1;
+                            d2dMute.ImageIndex += 1;
                             Mute = false;
                         }
                         else
                         {
-                            d2d.ImageIndex -= 1;
+                            d2dMute.ImageIndex -= 1;
                             Mute = true;
+                            StopSounds();
+                        }
+                    }
+                    if (d2dQuiet.IsCollision(new Description2D(info.X + d2dQuiet.Sprite.X, info.Y + d2dQuiet.Sprite.Y, 1, 1)))
+                    {
+                        if (Quiet)
+                        {
+                            d2dQuiet.ImageIndex -= 1;
+                            Quiet = false;
+                        }
+                        else
+                        {
+                            d2dQuiet.ImageIndex += 1;
+                            Quiet = true;
                             StopSounds();
                         }
                     }
@@ -143,6 +172,15 @@ namespace Game
             };
 
             await Engine.Start();
+        }
+
+        public static void MakeQuiet()
+        {
+            Description2D d2dQuiet = QuietEntity.Description as Description2D;
+
+            d2dQuiet.ImageIndex = 6;
+            Quiet = true;
+            StopSounds();
         }
 
         static List<string> rollingSounds = new List<string>()
@@ -264,7 +302,7 @@ namespace Game
         {
             if (!Mute)
             {
-                if (timer <= 0)
+                if (!Quiet && timer <= 0)
                 {
                     UI.PlayResource("Sounds.chatter2.wav");
                     timer = Program.FPS * 7;
@@ -277,7 +315,7 @@ namespace Game
                         timer--;
                         if (timer <= 0 && state.Location == GameLocation)
                         {
-                            if (!Mute)
+                            if (!Mute && !Quiet)
                             {
                                 UI.PlayResource("Sounds.chatter2.wav");
                                 timer = Program.FPS * 7;
@@ -311,11 +349,23 @@ namespace Game
 
         private static void MainMenuSetup()
         {
+            WinLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
+            WinLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
+            WinLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
+            WinLocation.AddEntity(new Entity(new TextDescription("          You win!\nThank you for playing", Program.Width / 2 - "Thank you for playing".Length * 18 / 4 + 6, Program.Height / 2 + 5)));
+            WinLocation.AddEntity(MuteEntity);
+            WinLocation.AddEntity(MuteTextEntity);
+            WinLocation.AddEntity(QuietEntity);
+            WinLocation.AddEntity(QuietTextEntity);
+
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
             MenuLocation.AddEntity(new Entity(new TextDescription("Click to continue", Program.Width / 2 - "Click to continue".Length * 18 / 4 + 6, Program.Height  - 32)));
             MenuLocation.AddEntity(MuteEntity);
+            MenuLocation.AddEntity(MuteTextEntity);
+            MenuLocation.AddEntity(QuietEntity);
+            MenuLocation.AddEntity(QuietTextEntity);
             Engine.TickEnd(0) += (object sender, GameState state) =>
             {
                 if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
@@ -327,13 +377,22 @@ namespace Game
 
             //Game Over
             GameOverLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
-            GameOverLocation.AddEntity(new Entity(new TextDescription("Game Over", Program.Width / 2 - ("Game Over".Length - 1) * 12 / 2, Program.Height / 2 - 20)));
+            GameOverLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
+            GameOverLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
+            GameOverLocation.AddEntity(new Entity(new TextDescription("       Game Over\nThank you for playing", Program.Width / 2 - "Thank you for playing".Length * 18 / 4 + 6, Program.Height / 2 + 5)));
+            GameOverLocation.AddEntity(MuteEntity);
+            GameOverLocation.AddEntity(MuteTextEntity);
+            GameOverLocation.AddEntity(QuietEntity);
+            GameOverLocation.AddEntity(QuietTextEntity);
 
             // Shop
             Entity ent;
             Description2D d2d;
             ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             ShopLocation.AddEntity(MuteEntity);
+            ShopLocation.AddEntity(MuteTextEntity);
+            ShopLocation.AddEntity(QuietEntity);
+            ShopLocation.AddEntity(QuietTextEntity);
 
             ShopLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Scorecard"], 16, 16, 320, 144)));
 
@@ -429,21 +488,33 @@ namespace Game
             RecruitLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             RecruitLocation.AddEntity(new Button(Program.RecruitLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseRecruitment));
             RecruitLocation.AddEntity(MuteEntity);
+            RecruitLocation.AddEntity(MuteTextEntity);
+            RecruitLocation.AddEntity(QuietEntity);
+            RecruitLocation.AddEntity(QuietTextEntity);
 
             // Upgrade
             UpgradeLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             UpgradeLocation.AddEntity(new Button(Program.UpgradeLocation, "Back", Program.Width - 80 - 16, yPos, GameRules.CloseUpgrades));
             UpgradeLocation.AddEntity(MuteEntity);
+            UpgradeLocation.AddEntity(MuteTextEntity);
+            UpgradeLocation.AddEntity(QuietEntity);
+            UpgradeLocation.AddEntity(QuietTextEntity);
 
 
             BattleLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             BattleLocation.AddEntity(MuteEntity);
+            BattleLocation.AddEntity(MuteTextEntity);
+            BattleLocation.AddEntity(QuietEntity);
+            BattleLocation.AddEntity(QuietTextEntity);
         }
 
         private static void GameSetup()
         {
             GameLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             GameLocation.AddEntity(MuteEntity);
+            GameLocation.AddEntity(MuteTextEntity);
+            GameLocation.AddEntity(QuietEntity);
+            GameLocation.AddEntity(QuietTextEntity);
 
             int x = Program.Width / 2 - 48 + 16;
             int xEnd = Program.Width - 16;

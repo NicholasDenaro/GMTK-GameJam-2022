@@ -55,9 +55,10 @@ namespace Game
                 if (!description.IsCollision(new Description2D(info.X + this.description.Sprite.X, info.Y + this.description.Sprite.Y, 1, 1)))
                 {
                     mouseDragging = false;
-                    if (info.X + this.description.Sprite.X > this.description.X
-                        && info.X + this.description.Sprite.X < this.description.X + this.description.Width
-                        && info.Y + this.description.Sprite.Y < this.description.Y)
+                    // force to be from the top
+                    //if (info.X + this.description.Sprite.X > this.description.X
+                    //    && info.X + this.description.Sprite.X < this.description.X + this.description.Width
+                    //    && info.Y + this.description.Sprite.Y < this.description.Y)
                     {
                         if (this.dice.Any() && GameRules.CanDrawAnotherDice())
                         {
