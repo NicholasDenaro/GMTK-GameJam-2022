@@ -27,14 +27,22 @@ namespace Game
 
         public void LoadSheet(Location location)
         {
-            sheets[Level].Display(location);
+
+            if (Level < this.sheets.Length)
+            {
+                sheets[Level].Display(location);
+            }
+            else
+            {
+                GameRules.WinScreen();
+            }
         }
 
         public void AdvanceLevel(Location location)
         {
             sheets[Level].Hide(location);
             Level++;
-            if (Level <= this.sheets.Length)
+            if (Level < this.sheets.Length)
             {
                 LoadSheet(location);
             }
@@ -79,21 +87,21 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
-                    new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
-                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
-                    new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
-                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
-                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
+                    //new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    //new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    //new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    //new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    //new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    //new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
                 yy = 0;
                 sideQuests = new SideQuest[]
                 {
-                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
-                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
-                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    //new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    //new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    //new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
                     new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
                 };
             }

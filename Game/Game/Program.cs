@@ -140,6 +140,7 @@ namespace Game
                         //GameRules.GameOver();
                         //GameRules.RecruitDice();
                         //GameRules.UpgradeDice(dice);
+                        //Scorecard.AdvanceLevel(GameLocation);
                     }
                 }
 
