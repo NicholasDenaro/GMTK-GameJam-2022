@@ -166,7 +166,7 @@ namespace Game
                         {
                             d2dQuiet.ImageIndex += 1;
                             Quiet = true;
-                            StopSounds();
+                            //StopSounds();
                         }
                     }
                 }

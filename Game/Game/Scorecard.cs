@@ -279,7 +279,7 @@ namespace Game
                     ((Description2D)checkBoxEntity.Description).ImageIndex = 6;
 
                     Program.Scorecard.CurrentQuestIndex = this.questIndex;
-                    Program.StopSounds();
+                    //Program.StopSounds();
                     GoOnQuest();
                 }
             }
