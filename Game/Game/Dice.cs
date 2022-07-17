@@ -110,6 +110,7 @@ namespace Game
             Program.BattleLocation.AddEntity(this);
             Program.BattleLocation.AddEntity(this.diceFace);
             Program.BattleLocation.AddEntity(this.symbolEntity);
+            this.diceInfoEntity.Hide();
 
             this.description.SetCoords(Program.Width / 2 - count * 48 / 2 + index * 48, Program.Height - 48 - row * 48);
             this.ResetPositions();
@@ -135,6 +136,7 @@ namespace Game
                 Program.Engine.Location(Program.GameState).RemoveEntity(this.healthEntity.Id);
             }
             Program.Engine.Location(Program.GameState).RemoveEntity(this.symbolEntity.Id);
+            this.diceInfoEntity.Hide();
 
             this.IsLocked = false;
             this.descriptionSymbol.ImageIndex = 0;

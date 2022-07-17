@@ -284,19 +284,27 @@ namespace Game
                     CurrentDiceInPlay = NumberOfDiceInPlay();
                 }
 
-                if (RollsLeft > 0 && state.Controllers[1][Program.Keys.ROLL].IsPress())
+                if (state.Controllers[1][Program.Keys.ROLL].IsPress())
                 {
-                    IEnumerable<Dice> diceList = state.Location.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice);
-                    if (!diceList.Any(dice => dice.IsRolling) && diceList.Any(dice => !dice.IsLocked))
-                    {
-                        foreach (Dice dice in diceList)
-                        {
-                            dice.Roll(withVelocity: true);
-                        }
+                    Roll();
+                }
+            }
+        }
 
-                        RollsLeft--;
-                        ((TextDescription)rollsLeftEntity.Description).ChangeText($"{RollsLeft}/{MaxRolls}");
+        public static void Roll()
+        {
+            if (RollsLeft > 0)
+            {
+                IEnumerable<Dice> diceList = Program.GameLocation.Entities.Where(entity => entity is Dice).Select(entity => entity as Dice);
+                if (!diceList.Any(dice => dice.IsRolling) && diceList.Any(dice => !dice.IsLocked))
+                {
+                    foreach (Dice dice in diceList)
+                    {
+                        dice.Roll(withVelocity: true);
                     }
+
+                    RollsLeft--;
+                    ((TextDescription)rollsLeftEntity.Description).ChangeText($"{RollsLeft}/{MaxRolls}");
                 }
             }
         }
