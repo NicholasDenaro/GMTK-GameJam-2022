@@ -42,6 +42,7 @@
     <None Remove="Sprites\scorecard.png" />
     <None Remove="Sprites\symbols.png" />
     <None Remove="Sprites\Title.png" />
+    <None Remove="Sprites\Tutorial.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,6 +78,7 @@
     <EmbeddedResource Include="Sprites\scorecard.png" />
     <EmbeddedResource Include="Sprites\symbols.png" />
     <EmbeddedResource Include="Sprites\Title.png" />
+    <EmbeddedResource Include="Sprites\Tutorial.png" />
   </ItemGroup>
 
   <ItemGroup>

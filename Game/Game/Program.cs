@@ -52,11 +52,15 @@ namespace Game
         public static Location RecruitLocation { get; private set; }
         public static Location WinLocation { get; private set; }
 
+        public static Location TutorialLocation { get; private set; }
+
         public static Scorecard Scorecard { get; private set; }
 
         public static Description2D PlayArea { get; private set; }
 
         public static DiceBag DiceBag { get; private set; }
+
+        private static Description2D tutorialDescription;
 
         private static NAudioMMLTrack battleMusic;
         private static NAudioMMLTrack ambientMusic;
@@ -78,13 +82,6 @@ namespace Game
                 .SoundPlayer(SoundPlayer = new NAudioSoundPlayer())
                 .Build();
 ;
-            GameLocation = new Location(new Description2D(0, 0, Width, Height));
-            GameOverLocation = new Location(new Description2D(0, 0, Width, Height));
-            BattleLocation = new Location(new Description2D(0, 0, Width, Height));
-            ShopLocation = new Location(new Description2D(0, 0, Width, Height));
-            UpgradeLocation = new Location(new Description2D(0, 0, Width, Height));
-            RecruitLocation = new Location(new Description2D(0, 0, Width, Height));
-            WinLocation = new Location(new Description2D(0, 0, Width, Height));
 
             new Sprite("dice", "Sprites.dice.png", 32, 32, 16, 16);
             new Sprite("diceFaces", "Sprites.diceFaces.png", 10, 10, 5, 5);
@@ -95,9 +92,7 @@ namespace Game
             new Sprite("desk", "Sprites.desk.png", Width, Height, 0, 0);
             new Sprite("JamLogo", "Sprites.Jam Logo 2022.png", 1920, 1053, 0, 0);
             new Sprite("Title", "Sprites.Title.png", 128, 80, 64, 0);
-
-            ambientMusic = new NAudioMMLTrack(SinWaveSound.Waves.PIANO, new GameEngine.UI.Audio.MML("t120l4 a+b+>c+<b e8g8b8e8d8a8e+4."));
-            SoundPlayer.PlayTrack(ambientMusic);
+            new Sprite("Tutorial", "Sprites.Tutorial.png", Program.Width * 2, Program.Height * 2, 0, 0);
 
             Description2D d2d;
             Description2D d2dMute;
@@ -112,9 +107,7 @@ namespace Game
             d2d.ImageIndex = 5;
             d2d.ZIndex = 1000;
 
-            MainMenuSetup();
-
-            Engine.SetLocation(GameStateIndex, MenuLocation);
+            Reset();
 
             TickHandler act = (o, s) => { };
             act = (o, s) => {
@@ -123,6 +116,24 @@ namespace Game
             };
 
             _soundPlayer = typeof(NAudioSoundPlayer).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).First(f => f.Name == "player").GetValue(SoundPlayer) as NAudio.Wave.WaveOutEvent;
+
+            ambientMusic = new NAudioMMLTrack(SinWaveSound.Waves.PIANO, new GameEngine.UI.Audio.MML("t120l4 a+b+>c+<b e8g8b8e8d8a8e+4."));
+            SoundPlayer.PlayTrack(ambientMusic);
+
+            Engine.TickEnd(0) += (object sender, GameState state) =>
+            {
+                if (state.Location == TutorialLocation && state.Controllers[0][Keys.CLICK].IsPress())
+                {
+                    if (tutorialDescription.ImageIndex >= 5)
+                    {
+                        Reset();
+                    }
+                    else
+                    {
+                        tutorialDescription.ImageIndex++;
+                    }
+                }
+            };
 
             Engine.TickEnd(0) += act;
 
@@ -179,6 +190,29 @@ namespace Game
             };
 
             await Engine.Start();
+        }
+
+        public static void Reset()
+        {
+            MenuLocation = new Location(new Description2D(0, 0, Width, Height));
+            GameLocation = new Location(new Description2D(0, 0, Width, Height));
+            GameOverLocation = new Location(new Description2D(0, 0, Width, Height));
+            BattleLocation = new Location(new Description2D(0, 0, Width, Height));
+            ShopLocation = new Location(new Description2D(0, 0, Width, Height));
+            UpgradeLocation = new Location(new Description2D(0, 0, Width, Height));
+            RecruitLocation = new Location(new Description2D(0, 0, Width, Height));
+            WinLocation = new Location(new Description2D(0, 0, Width, Height));
+            TutorialLocation = new Location(new Description2D(0, 0, Width, Height));
+            TutorialLocation.AddEntity(new Entity(tutorialDescription = new Description2D(Sprite.Sprites["Tutorial"], 0, 0, Program.Width, Program.Height)));
+
+            MainMenuSetup();
+
+            Engine.SetLocation(GameStateIndex, MenuLocation);
+        }
+
+        public static void Tutorial()
+        {
+            Engine.SetLocation(GameStateIndex, TutorialLocation);
         }
 
         public static void MakeQuiet()
@@ -364,24 +398,24 @@ namespace Game
             WinLocation.AddEntity(MuteTextEntity);
             WinLocation.AddEntity(QuietEntity);
             WinLocation.AddEntity(QuietTextEntity);
+            WinLocation.AddEntity(new Button(WinLocation, "Restart", Program.Width / 2 - Sprite.Sprites["Button"].Width, Program.Height / 2 + 5 + 20, () => { Program.Reset(); }));
 
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["Title"], Program.Width / 2 - 64, 16, 128 * 2, 80 * 2)));
             MenuLocation.AddEntity(new Entity(new TextDescription("By Nicholas (nDev) Denaro\n                 for the", Program.Width / 2 - "By Nicholas (nDev) Denaro".Length * 18 / 4, Program.Height / 2 + 6)));
             MenuLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["JamLogo"], Program.Width / 2 - 64, Program.Height / 2 + 48, 128, 80)));
-            MenuLocation.AddEntity(new Entity(new TextDescription("Click to continue", Program.Width / 2 - "Click to continue".Length * 18 / 4 + 6, Program.Height  - 32)));
+            //MenuLocation.AddEntity(new Entity(new TextDescription("Click to continue", Program.Width / 2 - "Click to continue".Length * 18 / 4 + 6, Program.Height  - 32)));
+            MenuLocation.AddEntity(new Button(WinLocation, "Start", Program.Width / 2 - Sprite.Sprites["Button"].Width - 2, Program.Height - 32, () => 
+            {
+                Engine.SetLocation(Program.GameStateIndex, GameLocation);
+                GameSetup();
+            }));
+            MenuLocation.AddEntity(new Button(WinLocation, "Tutorial", Program.Width / 2 + 2, Program.Height - 32, () => { Program.Tutorial(); }));
             MenuLocation.AddEntity(MuteEntity);
             MenuLocation.AddEntity(MuteTextEntity);
             MenuLocation.AddEntity(QuietEntity);
             MenuLocation.AddEntity(QuietTextEntity);
-            Engine.TickEnd(0) += (object sender, GameState state) =>
-            {
-                if (state.Location == MenuLocation && state.Controllers[0][Keys.CLICK].IsPress())
-                {
-                    Engine.SetLocation(Program.GameStateIndex, GameLocation);
-                    GameSetup();
-                }
-            };
+
 
             //Game Over
             GameOverLocation.AddEntity(new Entity(new Description2D(Sprite.Sprites["desk"], 0, 0)));

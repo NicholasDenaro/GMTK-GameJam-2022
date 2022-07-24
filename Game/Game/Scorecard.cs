@@ -87,21 +87,21 @@ namespace Game
             {
                 quests = new Quest[]
                 {
-                    //new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
-                    //new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
-                    //new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
-                    //new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
-                    //new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
-                    //new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
+                    new Quest("1♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 0),
+                    new Quest("2♥ 1⸸", x + xoffset, y + yoffset + yy++ * 20, 1),
+                    new Quest("3♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 2),
+                    new Quest("4♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 3),
+                    new Quest("5♥ 2⸸", x + xoffset, y + yoffset + yy++ * 20, 4),
+                    new Quest("6♥ 3⸸", x + xoffset, y + yoffset + yy++ * 20, 5),
                 };
 
                 yoffset += yy * 20;
                 yy = 0;
                 sideQuests = new SideQuest[]
                 {
-                    //new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
-                    //new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
-                    //new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Shop", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Rest", x + xoffset, y + yoffset + yy++ * 19),
+                    new SideQuest("Upgrade", x + xoffset, y + yoffset + yy++ * 19),
                     new SideQuest("Recruit", x + xoffset, y + yoffset + yy++ * 19),
                 };
             }
@@ -270,7 +270,7 @@ namespace Game
 
 
             Program.Engine.SetLocation(Program.GameStateIndex, Program.BattleLocation);
-            Regex r = new Regex("(?<health>[0-9]+).*(?<attack>[0-9]+)");
+            Regex r = new Regex("(?<health>[0-9]+). (?<attack>[0-9]+)");
             var match = r.Match(Text);
             GameRules.InitBattle(diceToBattle, int.Parse(match.Groups["health"].Value), int.Parse(match.Groups["attack"].Value));
 
